@@ -5,10 +5,17 @@ import java.util.Objects;
 public class PhoneNumber {
 
     private String countryCode; // ex: +40
+    private String areaCode; // ex. 21
     private String number; // ex: 740123456
 
-    public PhoneNumber(String countryCode, String number) {
+    public PhoneNumber(String countryCode, String areaCode, String number) {
         this.countryCode = countryCode;
+        this.areaCode=areaCode;
+        this.number = number;
+    }
+
+    public PhoneNumber(String areaCode, String number) {
+        this.areaCode = areaCode;
         this.number = number;
     }
 
@@ -44,7 +51,13 @@ public class PhoneNumber {
 
     @Override
     public String toString() {
-        return countryCode + '\'' +" "+
-                number + '\'' ;
+        String phoneToString="";
+        if (countryCode==null){
+            phoneToString=areaCode+number;
+        } else {
+            phoneToString=countryCode+areaCode+number;
+        }
+
+        return phoneToString;
     }
 }

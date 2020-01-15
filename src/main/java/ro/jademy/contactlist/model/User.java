@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class User {
+public class User implements Comparable<User> {
 
     private String firstName;
     private String lastName;
@@ -32,6 +32,15 @@ public class User {
 
     }
 
+    public User(String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, boolean isFavorite) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.age = age;
+        this.phoneNumbers = phoneNumbers;
+        this.address = address;
+        this.isFavorite = isFavorite;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -129,17 +138,22 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", age=" + age +
-                ", phoneNumbers=" + phoneNumbers +
-                ", address=" + address +
-                ", jobTitle='" + jobTitle + '\'' +
-                ", company=" + company +
-                ", isFavorite=" + isFavorite +
+                "firstName: '" + firstName + '\'' +
+                ", lastName: '" + lastName + '\'' +
+                ", email: '" + email + '\'' +
+                ", age: " + age +
+                ", phoneNumbers " + phoneNumbers +
+                ", address " + address +
+                ", jobTitle: '" + jobTitle + '\'' +
+                ", company:  " + company +
                 '}';
     }
 
-
+    @Override
+    public int compareTo(User o) {
+        if(lastName.compareTo(o.lastName) == 0) {
+            return firstName.compareTo(o.firstName);
+        }
+        return lastName.compareTo(o.lastName);
+    }
 }

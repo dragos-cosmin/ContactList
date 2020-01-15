@@ -53,13 +53,13 @@ public class Address {
     @Override
     public String toString() {
         return "Address{" +
-                "streetName='" + streetName + '\'' +
-                ", streetNumber=" + streetNumber +
-                ", apartmentNumber=" + apartmentNumber +
-                ", floor='" + floor + '\'' +
-                ", zipCode='" + zipCode + '\'' +
-                ", city='" + city + '\'' +
-                ", country='" + country + '\'' +
+                "streetName: '" + streetName + '\'' +
+                ", streetNumber: " + streetNumber +
+                ", apartmentNumber: " + apartmentNumber +
+                ", floor '" + floor + '\'' +
+                ", zipCode: '" + zipCode + '\'' +
+                ", city: '" + city + '\'' +
+                ", country: '" + country + '\'' +
                 '}';
     }
 
