@@ -151,9 +151,31 @@ public class User implements Comparable<User> {
 
     @Override
     public int compareTo(User o) {
-        if(lastName.compareTo(o.lastName) == 0) {
+        if (lastName.compareTo(o.lastName) == 0) {
             return firstName.compareTo(o.firstName);
         }
         return lastName.compareTo(o.lastName);
+    }
+
+    public void printUser() {
+        if (getFirstName()!=null&getLastName()!=null) System.out.println(getFirstName() + " " + getLastName());
+        if (getCompany()!=null) System.out.println(getCompany().getName());
+        for (Map.Entry<String, PhoneNumber> phoneNumberEntry: getPhoneNumbers().entrySet()) {
+            System.out.println(phoneNumberEntry.getKey());
+            System.out.println(phoneNumberEntry.getValue());
+        }
+        if (getEmail()!=null)System.out.println(getEmail());
+        System.out.println("home address");
+        System.out.println(getAddress().streetName + " nr. " + getAddress().streetNumber + " floor " + getAddress().floor + "  ap. " + getAddress().apartmentNumber);
+        System.out.println(getAddress().zipCode);
+        System.out.println(getAddress().city);
+        System.out.println(getAddress().country);
+        System.out.println("work address");
+        if (getCompany()!=null)System.out.println(getCompany().getAddress().streetName + " nr. " + getCompany().getAddress().streetNumber + " floor " + getCompany().getAddress().floor + "  ap. " + getCompany().getAddress().apartmentNumber);
+        if (getCompany()!=null)System.out.println(getCompany().getAddress().zipCode);
+        if (getCompany()!=null)System.out.println(getCompany().getAddress().city);
+        if (getCompany()!=null)System.out.println(getCompany().getAddress().country);
+
+
     }
 }
