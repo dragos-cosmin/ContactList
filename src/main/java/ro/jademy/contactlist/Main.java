@@ -117,18 +117,18 @@ public class Main {
         Map<String, List<User>> userByFirstLetter = contactList
                 .stream()
                 .collect(Collectors.groupingBy(user -> user.getFirstName().substring(0, 1), TreeMap::new, Collectors.toList()));
-            int index=1;
-            Map<Integer,User>indexedUser=new TreeMap<>();
+        int index = 1;
+        Map<Integer, User> indexedUser = new TreeMap<>();
         for (Map.Entry<String, List<User>> listEntry: userByFirstLetter.entrySet()) {
             System.out.println(listEntry.getKey());
             System.out.println("--------------------");
             List<User> usr = listEntry.getValue();
 
-           for (User u :usr ) {
-               System.out.println(index+". "+u.getFirstName() + " " + u.getLastName());
-               indexedUser.put(index,u);
-               index++;
-           }
+            for (User u: usr) {
+                System.out.println(index + ". " + u.getFirstName() + " " + u.getLastName());
+                indexedUser.put(index, u);
+                index++;
+            }
             System.out.println("--------------------");
             System.out.println("           " + usr.stream().count() + " contacts");
             System.out.println();
@@ -141,10 +141,10 @@ public class Main {
         System.out.println(String.format("execution of sort by letters took: %d ms", millis));
 
         System.out.println("input index: ");
-        Integer requestIndex=scanner.nextInt();
-        List <User> requestUser= indexedUser.entrySet().stream().filter(x->requestIndex.equals(x.getKey())).map(x->x.getValue()).collect(Collectors.toList());
-        for (User u : requestUser) {
-           u.printUser();
+        Integer requestIndex = scanner.nextInt();
+        List<User> requestUser = indexedUser.entrySet().stream().filter(x -> requestIndex.equals(x.getKey())).map(x -> x.getValue()).collect(Collectors.toList());
+        for (User u: requestUser) {
+            u.printUser();
         }
 
     }
@@ -183,7 +183,7 @@ public class Main {
         Address u3CompAdress = new Address("Pipera", 5, "560055", "Bucharest", "Romania");
         Company u3Company = new Company("Porche", u3CompAdress);
 
-        User us3 = new User("Dana", "Cosma", "thetin45@yahoo.com", 35, u3phoneNumbers, u3HomeAddress, "accountant", u3Company, false);
+        User us3 = new User("Dana", "", "thetin45@yahoo.com", 35, u3phoneNumbers, u3HomeAddress, "accountant", u3Company, false);
 
         //user 4
         Map<String, PhoneNumber> u4phoneNumbers = new HashMap<>();

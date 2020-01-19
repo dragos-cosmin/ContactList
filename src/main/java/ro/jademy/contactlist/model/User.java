@@ -158,23 +158,42 @@ public class User implements Comparable<User> {
     }
 
     public void printUser() {
-        if (getFirstName()!=null&getLastName()!=null) System.out.println(getFirstName() + " " + getLastName());
-        if (getCompany()!=null) System.out.println(getCompany().getName());
-        for (Map.Entry<String, PhoneNumber> phoneNumberEntry: getPhoneNumbers().entrySet()) {
-            System.out.println(phoneNumberEntry.getKey());
-            System.out.println(phoneNumberEntry.getValue());
+        if (getFirstName() == null) {
+            if (getLastName() == null) {
+                System.out.println("    ");
+            }
+            System.out.println(getLastName());
         }
-        if (getEmail()!=null)System.out.println(getEmail());
-        System.out.println("home address");
-        System.out.println(getAddress().streetName + " nr. " + getAddress().streetNumber + " floor " + getAddress().floor + "  ap. " + getAddress().apartmentNumber);
-        System.out.println(getAddress().zipCode);
-        System.out.println(getAddress().city);
-        System.out.println(getAddress().country);
-        System.out.println("work address");
-        if (getCompany()!=null)System.out.println(getCompany().getAddress().streetName + " nr. " + getCompany().getAddress().streetNumber + " floor " + getCompany().getAddress().floor + "  ap. " + getCompany().getAddress().apartmentNumber);
-        if (getCompany()!=null)System.out.println(getCompany().getAddress().zipCode);
-        if (getCompany()!=null)System.out.println(getCompany().getAddress().city);
-        if (getCompany()!=null)System.out.println(getCompany().getAddress().country);
+        System.out.println(getFirstName() + " " + getLastName());
+        if (getCompany() != null) System.out.println(getCompany().getName());
+        System.out.println();
+        String phone = "";
+        for (Map.Entry<String, PhoneNumber> phoneNumberEntry: getPhoneNumbers().entrySet()) {
+            phone = phoneNumberEntry.getKey() + " " + phoneNumberEntry.getValue();
+            System.out.printf("%17s %n", phone);
+        }
+        if (getEmail() != null) System.out.println(getEmail());
+        System.out.println();
+        if (getAddress() != null) {
+            System.out.println("home address");
+            System.out.println(getAddress().streetName + " nr. " + getAddress().streetNumber + " floor " + getAddress().floor + "  ap. " + getAddress().apartmentNumber);
+            System.out.print(getAddress().zipCode);
+            System.out.print(" " + getAddress().city);
+            System.out.print(" " + getAddress().country);
+        }
+        System.out.println();
+        System.out.println();
+        if (getCompany() != null) {
+            System.out.println("work address");
+            System.out.println(getCompany().getAddress().streetName + " nr. " + getCompany().getAddress().streetNumber);
+            if (getCompany().getAddress().floor != null) System.out.print(" floor " + getCompany().getAddress().floor);
+            if (getCompany().getAddress().apartmentNumber != null)
+                System.out.print("  ap. " + getCompany().getAddress().apartmentNumber);
+            System.out.print(getCompany().getAddress().zipCode);
+            System.out.print(" " + getCompany().getAddress().city);
+            System.out.print("  " + getCompany().getAddress().country);
+
+        }
 
 
     }
