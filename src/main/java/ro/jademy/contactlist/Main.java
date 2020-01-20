@@ -116,7 +116,13 @@ public class Main {
 
         Map<String, List<User>> userByFirstLetter = contactList
                 .stream()
-                .collect(Collectors.groupingBy(user -> user.getFirstName().substring(0, 1), TreeMap::new, Collectors.toList()));
+                .collect(Collectors.groupingBy(user -> {
+                            if (Character.isLetter(user.getFirstName().substring(0, 1).charAt(0)))
+                                return user.getFirstName().substring(0, 1);
+
+                            return "#";
+                        }
+                        , TreeMap::new, Collectors.toList()));
         int index = 1;
         Map<Integer, User> indexedUser = new TreeMap<>();
         for (Map.Entry<String, List<User>> listEntry: userByFirstLetter.entrySet()) {
@@ -195,9 +201,29 @@ public class Main {
 
         User us4 = new User("Ioana", "Toma", "tomna78@gmail.com", 21, u4phoneNumbers, u4HomeAddress, true);
 
-        List<User> contactList = Arrays.asList(us1, us2, us3, us4);
-        return contactList;
 
+        //user 5
+        Map<String, PhoneNumber> u5phoneNumbers = new HashMap<>();
+
+        u5phoneNumbers.put("home", new PhoneNumber("+40", "21", "2503056"));
+        u5phoneNumbers.put("mobile", new PhoneNumber("0724", "359897"));
+
+        Address u5HomeAddress = new Address("Eugen Botez", 24, 2, "1", "122589", "Bucharest", "Romania");
+
+        User us5 = new User("?", "!", "tomna78@gmail.com", 21, u4phoneNumbers, u4HomeAddress, true);
+
+        //user 6
+        Map<String, PhoneNumber> u6phoneNumbers = new HashMap<>();
+
+        u6phoneNumbers.put("home", new PhoneNumber("+40", "21", "2503056"));
+        u6phoneNumbers.put("mobile", new PhoneNumber("0724", "359897"));
+
+        Address u6HomeAddress = new Address("Eugen Botez", 24, 2, "1", "122589", "Bucharest", "Romania");
+
+        User us6 = new User("@", "Coco", "tomna78@gmail.com", 21, u4phoneNumbers, u4HomeAddress, true);
+
+        List<User> contactList = Arrays.asList(us1, us2, us3, us4, us5, us6);
+        return contactList;
 
     }
 
