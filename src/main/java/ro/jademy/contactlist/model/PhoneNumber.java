@@ -35,6 +35,14 @@ public class PhoneNumber {
         this.number = number;
     }
 
+    public String getAreaCode() {
+        return areaCode;
+    }
+
+    public void setAreaCode(String areaCode) {
+        this.areaCode = areaCode;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

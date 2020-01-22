@@ -6,6 +6,7 @@ import java.util.Objects;
 
 public class User implements Comparable<User> {
 
+    private int id;
     private String firstName;
     private String lastName;
     private String email;
@@ -58,12 +59,21 @@ public class User implements Comparable<User> {
         this.lastName = lastName;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return isFavorite == user.isFavorite &&
+        return id == user.id &&
+                isFavorite == user.isFavorite &&
                 Objects.equals(firstName, user.firstName) &&
                 Objects.equals(lastName, user.lastName) &&
                 Objects.equals(email, user.email) &&
@@ -76,7 +86,7 @@ public class User implements Comparable<User> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(firstName, lastName, email, age, phoneNumbers, address, jobTitle, company, isFavorite);
+        return Objects.hash(id, firstName, lastName, email, age, phoneNumbers, address, jobTitle, company, isFavorite);
     }
 
     public String getEmail() {
@@ -137,16 +147,7 @@ public class User implements Comparable<User> {
 
     @Override
     public String toString() {
-        return "User{" +
-                "firstName: '" + firstName + '\'' +
-                ", lastName: '" + lastName + '\'' +
-                ", email: '" + email + '\'' +
-                ", age: " + age +
-                ", phoneNumbers " + phoneNumbers +
-                ", address " + address +
-                ", jobTitle: '" + jobTitle + '\'' +
-                ", company:  " + company +
-                '}';
+        return id+". "+firstName+" "+lastName;
     }
 
     @Override
