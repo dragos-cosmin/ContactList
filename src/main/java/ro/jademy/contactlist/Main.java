@@ -7,7 +7,9 @@ import ro.jademy.contactlist.model.User;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -19,6 +21,7 @@ public class Main {
 
         // list contact list in natural order
         int opt;
+        long tInit, tFinal;
         do {
             System.out.println();
             printMenu();
@@ -28,7 +31,7 @@ public class Main {
             switch (opt) {
 
                 case 1:
-
+                    tInit = System.nanoTime();
                     Map<String, List<User>> userByFirstLetter = contactList
                             .stream()
                             .collect(Collectors.groupingBy(user -> {
@@ -52,75 +55,205 @@ public class Main {
                         System.out.println();
 
                     }
-
+                    tFinal = System.nanoTime();
+                    timeElapsed(tInit, tFinal);
                     break;
                 case 2:
                     // display favorites list sorted
+                    tInit = System.nanoTime();
                     System.out.println("****Favorite list****");
                     contactList
                             .stream()
                             .filter(user -> user.isFavorite() == true)
                             .sorted()
                             .forEach(System.out::println);
+                    tFinal = System.nanoTime();
+                    timeElapsed(tInit, tFinal);
+
                     break;
                 case 3:
                     System.out.println("input index: ");
                     Integer requestIndex = scanner.nextInt();
-                    User requestUser = contactList.stream().filter(x -> requestIndex.equals(x.getId())).findAny().get();
-                    requestUser.printUser();
+                    tInit = System.nanoTime();
+                    try {
+
+                        User requestUser = contactList.stream().filter(x -> requestIndex.equals(x.getId())).findAny().get();
+                        requestUser.printUser();
+                    } catch (NoSuchElementException e){
+                        System.out.println("The user has been previously removed, try another");
+                        break;
+                    }
                     System.out.println();
+                    tFinal = System.nanoTime();
+                    timeElapsed(tInit, tFinal);
                     break;
                 case 4:
                     //search user
 
                     System.out.println("Input search query:");
                     String query = scanner.next();
+                    tInit = System.nanoTime();
                     List<User> searchedUser = searchUser(contactList, query);
                     searchedUser.stream().sorted().forEach(System.out::println);
+                    tFinal = System.nanoTime();
+                    timeElapsed(tInit, tFinal);
+                    break;
+                case 5:
+                    // add new contact
+                    User newUser=new User();
+                    System.out.println("Input First Name: ");
+                    String firstName = scanner.next();
+                    System.out.println("Input Last Name: ");
+                    String lastName = scanner.next();
+                    System.out.println("Input age: ");
+                    Integer age = scanner.nextInt();
+                    System.out.println("Input email: ");
+                    String email = scanner.next();
+
+                    String choice;
+                    Map<String, PhoneNumber> userPhones = new HashMap<>();
+                    do {
+                        System.out.println("Input phone, choose work(w), home(h), mobile(m), exit(x): ");
+                        choice = scanner.next();
+
+                        switch (choice.toLowerCase()) {
+                            case "w":
+                                System.out.println("input workPhone CountryCode: ");
+                                String countryCode = scanner.next();
+                                System.out.println("input workPhone AreaCode: ");
+                                String areaCode = scanner.next();
+                                System.out.println("input workPhone number: ");
+                                String workNumber = scanner.next();
+                                userPhones.put("work", new PhoneNumber(countryCode, areaCode, workNumber));
+                                break;
+                            case "h":
+                                System.out.println("input homePhone CountryCode: ");
+                                countryCode = scanner.next();
+                                System.out.println("input homePhone AreaCode: ");
+                                areaCode = scanner.next();
+                                System.out.println("input homePhone number: ");
+                                String homeNumber = scanner.next();
+                                userPhones.put("home", new PhoneNumber(countryCode, areaCode, homeNumber));
+                                break;
+                            case "m":
+                                System.out.println("input mobilePhone CountryCode: ");
+                                countryCode = scanner.next();
+                                System.out.println("input mobilePhone AreaCode: ");
+                                areaCode = scanner.next();
+                                System.out.println("input mobilePhone number: ");
+                                String mobileNumber = scanner.next();
+                                userPhones.put("mobile", new PhoneNumber(countryCode, areaCode, mobileNumber));
+                                break;
+                            case ("x"):
+                                break;
+
+                            default:
+                                System.out.println("input valid options: w/h/m/x");
+                                break;
+                        }
+                    } while (!choice.equalsIgnoreCase("x"));
+
+                    System.out.println("Input home adress? Y/N");
+                    choice = scanner.next();
+                    Address homeAdress = new Address();
+                    if (choice.equalsIgnoreCase("Y")) {
+                        homeAdress = Address.createAdressFromKeyboard("home");
+                    }
+                    System.out.println("Input company details? Y/N");
+                    choice = scanner.next();
+
+                    if (choice.equalsIgnoreCase("Y")) {
+                        System.out.println("Input company name: ");
+                        String company = scanner.next();
+                        System.out.println("Input job title: ");
+                        scanner.nextLine();
+                        String jobTitle = scanner.next();
+                        Address workAdress = Address.createAdressFromKeyboard("work");
+                        Company userCompany = new Company(company, workAdress);
+                        System.out.println("Is favorite? true/false");
+
+                        Boolean isFavorite = scanner.nextBoolean();
+                    try {
+
+                        newUser = createUser(firstName, lastName, email, age, userPhones, homeAdress, userCompany, jobTitle, isFavorite);
+
+                        Integer maxId = contactList.stream().mapToInt(user1 -> user1.getId()).max().getAsInt();
+                        maxId++;
+                        newUser.setId(maxId);
+                    }catch (InputMismatchException e){
+                        System.out.println("There are some errors in completing the fields, try again");
+                        break;
+                    }
+
+                        System.out.println("You added new user: ");
+                        newUser.printUser();
+                        System.out.println();
+                        System.out.println("user id: " + newUser.getId());
+                        contactList.add(newUser);
+                    }
+
 
                     break;
+                case 6:
+                    //edit contact
+
+
+                    break;
+
+                case 7:
+                    //remove contact
+
+                    System.out.println("Input index: ");
+                    Integer index = scanner.nextInt();
+                    tInit = System.nanoTime();
+                    try {
+                        User removedUser = contactList.stream().filter(user -> user.getId() == index).findFirst().get();
+                        contactList.remove(removedUser);
+                        System.out.println("Removed contact: " + removedUser);
+                    }catch (NoSuchElementException e){
+                        System.out.println("The user has been previously removed, try another");
+                        break;
+                    }
+
+                    tFinal = System.nanoTime();
+                    timeElapsed(tInit, tFinal);
+
+                    break;
+
+                case 8:
+                    //statistics
+                    // count contacts number
+                    tInit = System.nanoTime();
+                    final long count = contactList.stream().count();
+                    System.out.println("You have " + count + " contacts in total");
+
+                    final long favoriteCount = contactList.stream().filter(user -> user.isFavorite()).count();
+                    System.out.println("You have " + favoriteCount + " contacts in your favorite list");
+
+                    final OptionalInt minAge = contactList.stream().mapToInt(User::getAge).min();
+                    System.out.println("Minimum age is: " + minAge);
+
+                    tFinal = System.nanoTime();
+                    timeElapsed(tInit, tFinal);
+                    break;
+
+                case 9:
+
+                    System.out.println("Good bye, see You soon!");
+                    System.exit(0);
+
+                    break;
+
+                default:
+                    System.out.println("Please input option 1-9");
+
             }
 
         } while (opt != 9);
-        // list contact list by a given criteria
-
-        //============list contact list by First Name=========
-
-        contactList
-                .stream()
-                .sorted((u1, u2) -> u1.getFirstName().compareTo(u2.getFirstName()))
-                .forEach(System.out::println);
-        //list contact list sorting by age and then by last name
-
-        contactList
-                .stream()
-                .sorted(Comparator.comparing(User::getAge).thenComparing(User::getLastName))
-                .forEach(System.out::println);
-
-
-        // display some statistics for the contact list
-
-        // count contacts number
-
-        final long count = contactList.stream().count();
-        System.out.println("You have " + count + " contacts in total");
-
-        final long favoriteCount = contactList.stream().filter(user -> user.isFavorite()).count();
-        System.out.println("You have " + favoriteCount + " contacts in your favorite list");
-
-        final OptionalInt minAge = contactList.stream().mapToInt(User::getAge).min();
-        System.out.println("Minimum age is: " + minAge);
-
-        // list grouping by letter in FirstName and LastName
-        long t0 = System.nanoTime();
-
-
-        long t1 = System.nanoTime();
-        long millis = TimeUnit.NANOSECONDS.toMillis(t1 - t0);
-        System.out.println(String.format("execution of sort by letters took: %d ms", millis));
-
 
     }
+
+    // Methods:
 
 
     public static List<User> getUserList() {
@@ -196,7 +329,13 @@ public class Main {
         User us6 = new User("@", "Coco", "tomna78@gmail.com", 21, u4phoneNumbers, u4HomeAddress, true);
         us6.setId(6);
 
-        List<User> contactList = Arrays.asList(us1, us2, us3, us4, us5, us6);
+        List<User> contactList = new ArrayList<>();
+        contactList.add(us1);
+        contactList.add(us2);
+        contactList.add(us3);
+        contactList.add(us4);
+        contactList.add(us5);
+        contactList.add(us6);
         return contactList;
 
     }
@@ -218,33 +357,30 @@ public class Main {
     }
 
     public static List<User> searchUser(List<User> userList, String query) {
-        List<User> resultFirsName = userList
-                .stream()
+        Supplier<Stream<User>> userlistStreamSupplier = () -> userList.stream();
+
+        List<User> resultFirsName = userlistStreamSupplier.get()
                 .filter(user -> user.getFirstName() != null)
                 .filter(user -> user.getFirstName().toLowerCase().contains(query.toLowerCase()))
                 .collect(Collectors.toList());
-        List<User> resultLastName = userList
-                .stream()
+        List<User> resultLastName = userlistStreamSupplier.get()
                 .filter(user -> user.getLastName() != null)
                 .filter(user -> user.getLastName().toLowerCase().contains(query.toLowerCase()))
                 .collect(Collectors.toList());
-        List<User> resultCompany = userList
-                .stream()
+        List<User> resultCompany = userlistStreamSupplier.get()
                 .filter(user -> user.getCompany() != null)
                 .filter(user -> user.getCompany().getName().toLowerCase().contains(query.toLowerCase()))
                 .collect(Collectors.toList());
-        List<User> resultJobTitle = userList
-                .stream()
+        List<User> resultJobTitle = userlistStreamSupplier.get()
                 .filter(user -> user.getJobTitle() != null)
                 .filter(user -> user.getJobTitle().toLowerCase().contains(query.toLowerCase()))
                 .collect(Collectors.toList());
-        List<User> resultPhone = userList
-                .stream()
+        List<User> resultPhone = userlistStreamSupplier.get()
                 .filter(user -> user.getPhoneNumbers() != null)
                 .filter(user -> user.getPhoneNumbers().values()
                         .stream()
                         .filter(phoneNumber -> phoneNumber.getNumber() != null)
-                        .map(phoneNumber -> phoneNumber.getCountryCode()+phoneNumber.getAreaCode()+phoneNumber.getNumber())
+                        .map(phoneNumber -> phoneNumber.getCountryCode() + phoneNumber.getAreaCode() + phoneNumber.getNumber())
                         .anyMatch(phoneNumber -> phoneNumber.contains(query)))
                 .collect(Collectors.toList());
         List<User> resultList = new ArrayList<>();
@@ -257,5 +393,16 @@ public class Main {
 
     }
 
+    public static User createUser(String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address homeAdress, Company company, String jobTitle, boolean isfavorite) throws InputMismatchException {
+
+        return new User(firstName, lastName, email, age, phoneNumbers, homeAdress, jobTitle, company, isfavorite);
+    }
+
+
+    public static void timeElapsed(long tInit, long tFinal) {
+        long millis = TimeUnit.NANOSECONDS.toMillis(tFinal - tInit);
+        System.out.println(String.format("operation complete in: %d ms", millis));
+
+    }
 
 }

@@ -1,6 +1,7 @@
 package ro.jademy.contactlist.model;
 
 import java.util.Objects;
+import java.util.Scanner;
 
 public class Address {
 
@@ -29,6 +30,10 @@ public class Address {
         this.zipCode = zipCode;
         this.city = city;
         this.country = country;
+    }
+
+    public Address(){
+
     }
 
     @Override
@@ -62,5 +67,30 @@ public class Address {
                 ", country: '" + country + '\'' +
                 '}';
     }
+
+    public static Address createAdressFromKeyboard (String adresstype){
+        Scanner scanner=new Scanner(System.in);
+        System.out.println("Input "+adresstype+" adress:");
+        System.out.println("Input street name: ");
+        String streetName=scanner.nextLine();
+        System.out.println("Input house number: ");
+        Integer streetNumber=scanner.nextInt();
+        System.out.println("Input apartment number: ");
+        Integer apartmentNumber=scanner.nextInt();
+        System.out.println("Input floor: ");
+        String floor=scanner.next();
+        System.out.println("Input Zip Code: ");
+        String zipCode=scanner.next();
+        System.out.println("Input cityname: ");
+        String city=scanner.next();
+        System.out.println("Input country: ");
+        String country=scanner.next();
+        return new Address(streetName,streetNumber,apartmentNumber,floor,zipCode,city,country);
+
+
+
+    }
+
+
 
 }

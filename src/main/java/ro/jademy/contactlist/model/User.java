@@ -3,6 +3,9 @@ package ro.jademy.contactlist.model;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class User implements Comparable<User> {
 
@@ -42,6 +45,8 @@ public class User implements Comparable<User> {
         this.address = address;
         this.isFavorite = isFavorite;
     }
+
+    public User(){}
 
     public String getFirstName() {
         return firstName;
@@ -147,7 +152,7 @@ public class User implements Comparable<User> {
 
     @Override
     public String toString() {
-        return id+". "+firstName+" "+lastName;
+        return id + ". " + firstName + " " + lastName;
     }
 
     @Override
@@ -198,4 +203,7 @@ public class User implements Comparable<User> {
 
 
     }
+
+
 }
+
