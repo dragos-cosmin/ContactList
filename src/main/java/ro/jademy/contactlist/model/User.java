@@ -3,6 +3,7 @@ package ro.jademy.contactlist.model;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -152,7 +153,31 @@ public class User implements Comparable<User> {
 
     @Override
     public String toString() {
-        return id + ". " + firstName + " " + lastName;
+        String mapToString="";
+        String adressToString="";
+        String userToString="";
+        StringJoiner joinerPhone=new StringJoiner(",");
+        StringJoiner joinerUserList=new StringJoiner("|");
+        StringJoiner joinerAdress=new StringJoiner("_");
+        for (Map.Entry<String,PhoneNumber> mapentry :phoneNumbers.entrySet() ) {
+            mapToString=(mapentry.getKey()+"_"+mapentry.getValue().getCountryCode()+"_"+mapentry.getValue().getAreaCode()+"_"+mapentry.getValue().getNumber());
+            joinerPhone.add(mapToString);
+            mapToString=joinerPhone.toString();
+        }
+        if (company==null){
+
+            adressToString="home_"+(joinerAdress.add(address.streetName).add(Integer.toString(address.streetNumber)).add(Integer.toString(address.apartmentNumber)).add(address.floor).add(address.zipCode).add(address.city).add(address.country)).toString();
+            userToString=(joinerUserList.add(Integer.toString(id)).add(firstName).add(lastName).add(mapToString).add(email).add(Integer.toString(age)).add(adressToString).add("").add("").add(Boolean.toString(isFavorite))).toString();
+
+        } else {
+            adressToString="home_"+(joinerAdress.add(address.streetName).add(Integer.toString(address.streetNumber)).add(Integer.toString(address.apartmentNumber)).add(address.floor).add(address.zipCode).add(address.city).add(address.country)).toString()+",work_"+(joinerAdress.add(company.getAddress().streetName).add(Integer.toString(company.getAddress().streetNumber)).add(Integer.toString(company.getAddress().apartmentNumber)).add(company.getAddress().floor).add(company.getAddress().zipCode).add(company.getAddress().city).add(company.getAddress().country)).toString();
+            userToString=(joinerUserList.add(Integer.toString(id)).add(firstName).add(lastName).add(mapToString).add(email).add(Integer.toString(age)).add(adressToString).add(company.getName()).add(jobTitle).add(Boolean.toString(isFavorite))).toString();
+        }
+
+
+
+        return userToString;
+
     }
 
     @Override
@@ -163,7 +188,14 @@ public class User implements Comparable<User> {
         return lastName.compareTo(o.lastName);
     }
 
-    public void printUser() {
+    public void printUser () {
+        System.out.println(id + ". " + firstName + " " + lastName);
+
+
+    }
+
+
+    public void printUserDetails () {
         if (getFirstName() == null) {
             if (getLastName() == null) {
                 System.out.println("    ");
@@ -171,7 +203,9 @@ public class User implements Comparable<User> {
             System.out.println(getLastName());
         }
         System.out.println(getFirstName() + " " + getLastName());
-        if (getCompany() != null) System.out.println(getCompany().getName());
+        if (getCompany() != null&&(!getCompany().getName().equalsIgnoreCase(""))) System.out.println(getCompany().getName());
+        if (jobTitle!=null&&(!getJobTitle().equalsIgnoreCase(""))) System.out.println(jobTitle);
+
         System.out.println();
         String phone = "";
         for (Map.Entry<String, PhoneNumber> phoneNumberEntry: getPhoneNumbers().entrySet()) {
@@ -189,12 +223,12 @@ public class User implements Comparable<User> {
         }
         System.out.println();
         System.out.println();
-        if (getCompany() != null) {
+        if (getCompany() != null&&(!getCompany().getName().equalsIgnoreCase(""))) {
             System.out.println("work address");
-            System.out.println(getCompany().getAddress().streetName + " nr. " + getCompany().getAddress().streetNumber);
+            System.out.print(getCompany().getAddress().streetName + " nr. " + getCompany().getAddress().streetNumber);
             if (getCompany().getAddress().floor != null) System.out.print(" floor " + getCompany().getAddress().floor);
             if (getCompany().getAddress().apartmentNumber != null)
-                System.out.print("  ap. " + getCompany().getAddress().apartmentNumber);
+                System.out.println("  ap. " + getCompany().getAddress().apartmentNumber);
             System.out.print(getCompany().getAddress().zipCode);
             System.out.print(" " + getCompany().getAddress().city);
             System.out.print("  " + getCompany().getAddress().country);

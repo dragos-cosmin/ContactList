@@ -1,10 +1,12 @@
 package ro.jademy.contactlist;
 
+
 import ro.jademy.contactlist.model.Address;
 import ro.jademy.contactlist.model.Company;
 import ro.jademy.contactlist.model.PhoneNumber;
 import ro.jademy.contactlist.model.User;
 
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -17,7 +19,9 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         // create a contact list of users
 
-        List<User> contactList = getUserList();
+
+        List<User> contactList = getUserListFromFile("contactlist.csv");
+        String userHeader=readHeaderFromFile("contactlist.csv");
 
         // list contact list in natural order
         int opt;
@@ -66,25 +70,27 @@ public class Main {
                             .stream()
                             .filter(user -> user.isFavorite() == true)
                             .sorted()
-                            .forEach(System.out::println);
+                            .forEach(user -> user.printUser());
                     tFinal = System.nanoTime();
                     timeElapsed(tInit, tFinal);
 
                     break;
                 case 3:
+                    //print details of user
                     System.out.println("input index: ");
                     Integer requestIndex = scanner.nextInt();
                     tInit = System.nanoTime();
                     try {
 
                         User requestUser = contactList.stream().filter(x -> requestIndex.equals(x.getId())).findAny().get();
-                        requestUser.printUser();
-                    } catch (NoSuchElementException e){
+                        requestUser.printUserDetails();
+                    } catch (NoSuchElementException e) {
                         System.out.println("The user has been previously removed, try another");
                         break;
                     }
                     System.out.println();
                     tFinal = System.nanoTime();
+                    System.out.println();
                     timeElapsed(tInit, tFinal);
                     break;
                 case 4:
@@ -94,13 +100,14 @@ public class Main {
                     String query = scanner.next();
                     tInit = System.nanoTime();
                     List<User> searchedUser = searchUser(contactList, query);
-                    searchedUser.stream().sorted().forEach(System.out::println);
+                    searchedUser.stream().sorted().forEach(user -> user.printUser());
                     tFinal = System.nanoTime();
                     timeElapsed(tInit, tFinal);
                     break;
                 case 5:
                     // add new contact
-                    User newUser=new User();
+                    User newUser = new User();
+                    User newUserNoComp=new User();
                     System.out.println("Input First Name: ");
                     String firstName = scanner.next();
                     System.out.println("Input Last Name: ");
@@ -170,27 +177,50 @@ public class Main {
                         String jobTitle = scanner.next();
                         Address workAdress = Address.createAdressFromKeyboard("work");
                         Company userCompany = new Company(company, workAdress);
+
                         System.out.println("Is favorite? true/false");
 
                         Boolean isFavorite = scanner.nextBoolean();
-                    try {
+                        try {
 
-                        newUser = createUser(firstName, lastName, email, age, userPhones, homeAdress, userCompany, jobTitle, isFavorite);
+                            newUser = createUser(firstName, lastName, email, age, userPhones, homeAdress, userCompany, jobTitle, isFavorite);
 
-                        Integer maxId = contactList.stream().mapToInt(user1 -> user1.getId()).max().getAsInt();
-                        maxId++;
-                        newUser.setId(maxId);
-                    }catch (InputMismatchException e){
-                        System.out.println("There are some errors in completing the fields, try again");
-                        break;
-                    }
+                            Integer maxId = contactList.stream().mapToInt(user1 -> user1.getId()).max().getAsInt();
+                            maxId++;
+                            newUser.setId(maxId);
+                        } catch (InputMismatchException e) {
+                            System.out.println("There are some errors in completing the fields, try again");
+                            break;
+                        }
 
                         System.out.println("You added new user: ");
-                        newUser.printUser();
+                        newUser.printUserDetails();
                         System.out.println();
                         System.out.println("user id: " + newUser.getId());
                         contactList.add(newUser);
+                    }else {
+                        System.out.println("Is favorite? true/false");
+                        Boolean isFavorite = scanner.nextBoolean();
+
+                        try {
+                            newUserNoComp=createUserNoCompany(firstName,lastName,email,age,userPhones,homeAdress,isFavorite);
+                            Integer maxId = contactList.stream().mapToInt(user1 -> user1.getId()).max().getAsInt();
+                            maxId++;
+                            newUserNoComp.setId(maxId);
+                        } catch (InputMismatchException e){
+                            System.out.println("There are some errors in completing the fields, try again");
+                            break;
+                        }
+                        System.out.println("You added new user: ");
+                        newUserNoComp.printUserDetails();
+                        System.out.println();
+                        System.out.println("user id: " + newUserNoComp.getId());
+                        contactList.add(newUserNoComp);
+
+
+
                     }
+
 
 
                     break;
@@ -209,8 +239,9 @@ public class Main {
                     try {
                         User removedUser = contactList.stream().filter(user -> user.getId() == index).findFirst().get();
                         contactList.remove(removedUser);
-                        System.out.println("Removed contact: " + removedUser);
-                    }catch (NoSuchElementException e){
+                        System.out.print("Removed contact: ");
+                        removedUser.printUser();
+                    } catch (NoSuchElementException e) {
                         System.out.println("The user has been previously removed, try another");
                         break;
                     }
@@ -239,6 +270,7 @@ public class Main {
 
                 case 9:
 
+                    writeUserToFile("contactlist.csv",contactList,userHeader,false);
                     System.out.println("Good bye, see You soon!");
                     System.exit(0);
 
@@ -340,6 +372,98 @@ public class Main {
 
     }
 
+    public static List<User> getUserListFromFile(String userFileName) {
+        List<User> contactList = new ArrayList<>();
+        List<String> fileLines = new ArrayList<>();
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(new File(userFileName)));
+            fileLines = in.lines().collect(Collectors.toList());
+
+
+        } catch (IOException ex) {
+            System.out.println("File not found\n" + ex);
+        }
+
+        for (String s: fileLines) {
+            if (!s.contains("INDEX")) {
+
+
+                String[] fields = s.split("\\|");
+                Integer userId = Integer.parseInt(fields[0]);
+                String firstName = fields[1];
+                String lastName = fields[2];
+                String phoneNumbers = fields[3];
+                String[] phones = phoneNumbers.split(",");
+                Map<String, PhoneNumber> phoneNumber = new HashMap<>();
+                for (int i = 0; i < phones.length; i++) {
+                    String[] phoneFields = phones[i].split("_");
+                    String phoneType = phoneFields[0];
+                    String phoneCountryCode = phoneFields[1];
+                    String phoneAreaCode = phoneFields[2];
+                    String phoneNo = phoneFields[3];
+                    phoneNumber.put(phoneType, new PhoneNumber(phoneCountryCode, phoneAreaCode, phoneNo));
+                }
+
+                String email = fields[4];
+                Integer age = Integer.parseInt(fields[5]);
+                String adresses = fields[6];
+                Address homeAdress = new Address();
+                Address workAdress = new Address();
+                String[] adress = adresses.split(",");
+                for (int i = 0; i < adress.length; i++) {
+                    String[] adressFields = adress[i].split("_");
+                    if (adressFields[0].equalsIgnoreCase("home")) {
+                        homeAdress.setStreetName(adressFields[1]);
+                        homeAdress.setStreetNumber(Integer.parseInt(adressFields[2]));
+                        homeAdress.setApartmentNumber(Integer.parseInt(adressFields[3]));
+                        homeAdress.setFloor(adressFields[4]);
+                        homeAdress.setZipCode(adressFields[5]);
+                        homeAdress.setCity(adressFields[6]);
+                        homeAdress.setCountry(adressFields[7]);
+
+                    } else if (adressFields[0].equalsIgnoreCase("work")) {
+                        workAdress.setStreetName(adressFields[1]);
+                        workAdress.setStreetNumber(Integer.parseInt(adressFields[2]));
+                        workAdress.setApartmentNumber(Integer.parseInt(adressFields[3]));
+                        workAdress.setFloor(adressFields[4]);
+                        workAdress.setZipCode(adressFields[5]);
+                        workAdress.setCity(adressFields[6]);
+                        workAdress.setCountry(adressFields[7]);
+
+                    }
+                }
+
+
+                String companyName = fields[7];
+                Company userCompany = new Company(companyName, workAdress);
+                String jobTitle = fields[8];
+                Boolean isFavorite = Boolean.parseBoolean(fields[9]);
+                User user = createUser(firstName, lastName, email, age, phoneNumber, homeAdress, userCompany, jobTitle, isFavorite);
+                user.setId(userId);
+                contactList.add(user);
+            }
+
+        }
+
+        return contactList;
+    }
+        public static String readHeaderFromFile (String fileName){
+
+        String header="";
+        try (BufferedReader in=new BufferedReader(new FileReader(fileName))){
+
+                header=in.readLine().toString();
+
+
+            } catch (IOException ex){
+                System.out.println("File not found\n" + ex);
+            }
+
+
+        return header;
+
+        }
+
     public static void printMenu() {
         System.out.println("   CONTACT LIST    ");
         System.out.println("===================");
@@ -396,6 +520,28 @@ public class Main {
     public static User createUser(String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address homeAdress, Company company, String jobTitle, boolean isfavorite) throws InputMismatchException {
 
         return new User(firstName, lastName, email, age, phoneNumbers, homeAdress, jobTitle, company, isfavorite);
+    }
+
+    public static User createUserNoCompany (String firstName, String lastName, String email, Integer age, Map<String,PhoneNumber>phoneNumbers,Address homeAdress,boolean isFavorite){
+        return new User(firstName,lastName,email,age,phoneNumbers,homeAdress,isFavorite);
+    }
+
+    public static void writeUserToFile(String fileName, List<User> userList, String header, boolean append) {
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(fileName, append))) {
+
+            out.append(header);
+            for (User u: userList) {
+                out.newLine();
+                out.append(u.toString());
+            }
+
+
+        } catch (IOException ex) {
+
+            System.out.println("File not found\n" + ex);
+        }
+
+
     }
 
 
