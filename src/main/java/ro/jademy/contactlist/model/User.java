@@ -158,19 +158,20 @@ public class User implements Comparable<User> {
         String userToString="";
         StringJoiner joinerPhone=new StringJoiner(",");
         StringJoiner joinerUserList=new StringJoiner("|");
-        StringJoiner joinerAdress=new StringJoiner("_");
-        for (Map.Entry<String,PhoneNumber> mapentry :phoneNumbers.entrySet() ) {
-            mapToString=(mapentry.getKey()+"_"+mapentry.getValue().getCountryCode()+"_"+mapentry.getValue().getAreaCode()+"_"+mapentry.getValue().getNumber());
+        StringJoiner joinerHomeAddress=new StringJoiner("_");
+        StringJoiner joinerWorkAddress=new StringJoiner("_");
+        for (Map.Entry<String,PhoneNumber> mapEntry :phoneNumbers.entrySet() ) {
+            mapToString=(mapEntry.getKey()+"_"+mapEntry.getValue().getCountryCode()+"_"+mapEntry.getValue().getAreaCode()+"_"+mapEntry.getValue().getNumber());
             joinerPhone.add(mapToString);
             mapToString=joinerPhone.toString();
         }
-        if (company==null){
+        if (company==null||company.getName().equalsIgnoreCase("")){
 
-            adressToString="home_"+(joinerAdress.add(address.streetName).add(Integer.toString(address.streetNumber)).add(Integer.toString(address.apartmentNumber)).add(address.floor).add(address.zipCode).add(address.city).add(address.country)).toString();
+            adressToString="home_"+(joinerHomeAddress.add(address.streetName).add(Integer.toString(address.streetNumber)).add(Integer.toString(address.apartmentNumber)).add(address.floor).add(address.zipCode).add(address.city).add(address.country)).toString();
             userToString=(joinerUserList.add(Integer.toString(id)).add(firstName).add(lastName).add(mapToString).add(email).add(Integer.toString(age)).add(adressToString).add("").add("").add(Boolean.toString(isFavorite))).toString();
 
         } else {
-            adressToString="home_"+(joinerAdress.add(address.streetName).add(Integer.toString(address.streetNumber)).add(Integer.toString(address.apartmentNumber)).add(address.floor).add(address.zipCode).add(address.city).add(address.country)).toString()+",work_"+(joinerAdress.add(company.getAddress().streetName).add(Integer.toString(company.getAddress().streetNumber)).add(Integer.toString(company.getAddress().apartmentNumber)).add(company.getAddress().floor).add(company.getAddress().zipCode).add(company.getAddress().city).add(company.getAddress().country)).toString();
+            adressToString="home_"+(joinerHomeAddress.add(address.streetName).add(Integer.toString(address.streetNumber)).add(Integer.toString(address.apartmentNumber)).add(address.floor).add(address.zipCode).add(address.city).add(address.country)).toString()+",work_"+(joinerWorkAddress.add(company.getAddress().streetName).add(Integer.toString(company.getAddress().streetNumber)).add(Integer.toString(company.getAddress().apartmentNumber)).add(company.getAddress().floor).add(company.getAddress().zipCode).add(company.getAddress().city).add(company.getAddress().country)).toString();
             userToString=(joinerUserList.add(Integer.toString(id)).add(firstName).add(lastName).add(mapToString).add(email).add(Integer.toString(age)).add(adressToString).add(company.getName()).add(jobTitle).add(Boolean.toString(isFavorite))).toString();
         }
 

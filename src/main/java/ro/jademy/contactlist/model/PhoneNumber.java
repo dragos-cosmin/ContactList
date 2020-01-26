@@ -1,9 +1,12 @@
 package ro.jademy.contactlist.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Scanner;
 
 public class PhoneNumber {
-
+    Scanner scanner=new Scanner(System.in);
     private String countryCode; // ex: +40
     private String areaCode; // ex. 21
     private String number; // ex: 740123456
@@ -68,4 +71,7 @@ public class PhoneNumber {
 
         return phoneToString;
     }
+
+
+
 }

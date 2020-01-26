@@ -119,47 +119,7 @@ public class Main {
 
                     String choice;
                     Map<String, PhoneNumber> userPhones = new HashMap<>();
-                    do {
-                        System.out.println("Input phone, choose work(w), home(h), mobile(m), exit(x): ");
-                        choice = scanner.next();
-
-                        switch (choice.toLowerCase()) {
-                            case "w":
-                                System.out.println("input workPhone CountryCode: ");
-                                String countryCode = scanner.next();
-                                System.out.println("input workPhone AreaCode: ");
-                                String areaCode = scanner.next();
-                                System.out.println("input workPhone number: ");
-                                String workNumber = scanner.next();
-                                userPhones.put("work", new PhoneNumber(countryCode, areaCode, workNumber));
-                                break;
-                            case "h":
-                                System.out.println("input homePhone CountryCode: ");
-                                countryCode = scanner.next();
-                                System.out.println("input homePhone AreaCode: ");
-                                areaCode = scanner.next();
-                                System.out.println("input homePhone number: ");
-                                String homeNumber = scanner.next();
-                                userPhones.put("home", new PhoneNumber(countryCode, areaCode, homeNumber));
-                                break;
-                            case "m":
-                                System.out.println("input mobilePhone CountryCode: ");
-                                countryCode = scanner.next();
-                                System.out.println("input mobilePhone AreaCode: ");
-                                areaCode = scanner.next();
-                                System.out.println("input mobilePhone number: ");
-                                String mobileNumber = scanner.next();
-                                userPhones.put("mobile", new PhoneNumber(countryCode, areaCode, mobileNumber));
-                                break;
-                            case ("x"):
-                                break;
-
-                            default:
-                                System.out.println("input valid options: w/h/m/x");
-                                break;
-                        }
-                    } while (!choice.equalsIgnoreCase("x"));
-
+                    userPhones=getPhonesFromKeyboard();
                     System.out.println("Input home adress? Y/N");
                     choice = scanner.next();
                     Address homeAdress = new Address();
@@ -175,8 +135,15 @@ public class Main {
                         System.out.println("Input job title: ");
                         scanner.nextLine();
                         String jobTitle = scanner.next();
-                        Address workAdress = Address.createAdressFromKeyboard("work");
-                        Company userCompany = new Company(company, workAdress);
+                        Company userCompany=new Company();
+                        try {
+                            Address workAdress = Address.createAdressFromKeyboard("work");
+                            userCompany = new Company(company, workAdress);
+                        }catch (InputMismatchException e){
+                            System.out.println("Incorect parameters"+e);
+                        }
+
+
 
                         System.out.println("Is favorite? true/false");
 
@@ -226,9 +193,185 @@ public class Main {
                     break;
                 case 6:
                     //edit contact
+                    System.out.println("input index: ");
+                    requestIndex = scanner.nextInt();
+                    tInit = System.nanoTime();
+                    try {
 
+                        User requestUser = contactList.stream().filter(x -> requestIndex.equals(x.getId())).findAny().get();
 
+                        do {
+                        requestUser.printUserDetails();
+                            System.out.println();
+                        System.out.println("Input field you want to modify: ");
+                        System.out.println(" First name:      1");
+                        System.out.println(" Last name:       2");
+                        System.out.println(" Company name:    3");
+                        System.out.println(" Job Title:       4");
+                        System.out.println(" Phone numbers:   5");
+                        System.out.println(" email:           6");
+                        System.out.println(" Adresses:        7");
+                        System.out.println(" isFavorite:      8");
+                        //System.out.println("All fields - 9");
+                        System.out.println("EXIT - 0 ");
+                        opt=scanner.nextInt();
+                        scanner.nextLine();
+                        switch (opt){
+                            case 1:
+                                System.out.println("Input new first name: ");
+                                firstName=scanner.nextLine();
+                                requestUser.setFirstName(firstName);
+                                break;
+                            case 2:
+                                System.out.println("Input new last name: ");
+                                lastName=scanner.nextLine();
+                                requestUser.setLastName(lastName);
+                                break;
+                            case 3:
+                                System.out.println("Input new Company name: ");
+                                String companyName=scanner.nextLine();
+                                requestUser.getCompany().setName(companyName);
+                                break;
+                            case 4:
+                                System.out.println("Input new job title: ");
+                                String jobTitle=scanner.nextLine();
+                                requestUser.setJobTitle(jobTitle);
+                                break;
+                            case 5:
+                                requestUser.setPhoneNumbers(getPhonesFromKeyboard());
+                                break;
+                            case 6:
+                                System.out.println("Input new email: ");
+                                email=scanner.nextLine();
+                                requestUser.setEmail(email);
+                                break;
+                            case 7:
+                                System.out.println("Input adress type: (home/work)");
+                                choice=scanner.nextLine();
+                                switch (choice.toLowerCase()) {
+                                    case ("home"):
+                                        System.out.println("Street name is: " + requestUser.getAddress().getStreetName());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new street name: ");
+                                            requestUser.getAddress().setStreetName(scanner.nextLine());
+                                        }
+                                        System.out.println("House number is: " + requestUser.getAddress().getStreetNumber());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new house number: ");
+                                            requestUser.getAddress().setStreetNumber(scanner.nextInt());
+                                            scanner.nextLine();
+                                        }
+                                        System.out.println("Apartment number is: " + requestUser.getAddress().getApartmentNumber());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new apartment number: ");
+                                            requestUser.getAddress().setApartmentNumber(scanner.nextInt());
+                                            scanner.nextLine();
+                                        }
+                                        System.out.println("Floor number is: " + requestUser.getAddress().getFloor());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new floor number: ");
+                                            requestUser.getAddress().setFloor(scanner.nextLine());
+                                        }
+                                        System.out.println("ZipCode number is: " + requestUser.getAddress().getZipCode());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new zipCode: ");
+                                            requestUser.getAddress().setZipCode(scanner.nextLine());
+                                        }
+                                        System.out.println("City is: " + requestUser.getAddress().getCity());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new city: ");
+                                            requestUser.getAddress().setCity(scanner.nextLine());
+                                        }
+                                        System.out.println("Country is: " + requestUser.getAddress().getCountry());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new Country: ");
+                                            requestUser.getAddress().setCountry(scanner.nextLine());
+                                        }
+                                        break;
+                                    case ("work"):
+                                        System.out.println("Street name is: " + requestUser.getCompany().getAddress().getStreetName());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new street name: ");
+                                            requestUser.getCompany().getAddress().setStreetName(scanner.nextLine());
+                                        }
+                                        System.out.println("House number is: " + requestUser.getCompany().getAddress().getStreetNumber());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new house number: ");
+                                            requestUser.getCompany().getAddress().setStreetNumber(scanner.nextInt());
+                                            scanner.nextLine();
+                                        }
+                                        System.out.println("Apartment number is: " + requestUser.getCompany().getAddress().getApartmentNumber());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new apartment number: ");
+                                            requestUser.getCompany().getAddress().setApartmentNumber(scanner.nextInt());
+                                            scanner.nextLine();
+                                        }
+                                        System.out.println("Floor number is: " + requestUser.getCompany().getAddress().getFloor());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new floor number: ");
+                                            requestUser.getCompany().getAddress().setFloor(scanner.nextLine());
+                                        }
+                                        System.out.println("ZipCode number is: " + requestUser.getCompany().getAddress().getZipCode());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new zipCode: ");
+                                            requestUser.getCompany().getAddress().setZipCode(scanner.nextLine());
+                                        }
+                                        System.out.println("City is: " + requestUser.getCompany().getAddress().getCity());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new city: ");
+                                            requestUser.getCompany().getAddress().setCity(scanner.nextLine());
+                                        }
+                                        System.out.println("Country is: " + requestUser.getCompany().getAddress().getCountry());
+                                        System.out.println("You want to change? (Y/N)");
+                                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                            System.out.println("Input new Country: ");
+                                            requestUser.getCompany().getAddress().setCountry(scanner.nextLine());
+                                        }
+                                        break;
+
+                                    default:
+                                        System.out.println("Options home/work");
+                                        break;
+                                }
+                                break;
+                            case 8:
+                                System.out.println("isFavorite is: "+requestUser.isFavorite());
+                                System.out.println("You want to change? Y/N");
+                                if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                                    System.out.println("Input new is Favorite: ");
+                                    requestUser.setFavorite(scanner.nextBoolean());
+                                }
+                                break;
+                            case 9:
+                                break;
+                            case 0:
+                                break;
+                        }
+                        } while (opt!=0);
+
+                    } catch (NoSuchElementException e) {
+                        System.out.println("The user has been previously removed, try another");
+                        break;
+                    }
+                    System.out.println();
+                    tFinal = System.nanoTime();
+                    System.out.println();
+                    timeElapsed(tInit, tFinal);
                     break;
+
 
                 case 7:
                     //remove contact
@@ -549,6 +692,53 @@ public class Main {
         long millis = TimeUnit.NANOSECONDS.toMillis(tFinal - tInit);
         System.out.println(String.format("operation complete in: %d ms", millis));
 
+    }
+
+    public static Map<String,PhoneNumber> getPhonesFromKeyboard (){
+        Scanner scanner=new Scanner(System.in);
+        String choice;
+        Map<String, PhoneNumber> userPhones = new HashMap<>();
+        do {
+            System.out.println("Input phone, choose work(w), home(h), mobile(m), exit(x): ");
+            choice =scanner.next();
+
+            switch (choice.toLowerCase()) {
+                case "w":
+                    System.out.println("input workPhone CountryCode: ");
+                    String countryCode = scanner.next();
+                    System.out.println("input workPhone AreaCode: ");
+                    String areaCode = scanner.next();
+                    System.out.println("input workPhone number: ");
+                    String workNumber = scanner.next();
+                    userPhones.put("work", new PhoneNumber(countryCode, areaCode, workNumber));
+                    break;
+                case "h":
+                    System.out.println("input homePhone CountryCode: ");
+                    countryCode = scanner.next();
+                    System.out.println("input homePhone AreaCode: ");
+                    areaCode = scanner.next();
+                    System.out.println("input homePhone number: ");
+                    String homeNumber = scanner.next();
+                    userPhones.put("home", new PhoneNumber(countryCode, areaCode, homeNumber));
+                    break;
+                case "m":
+                    System.out.println("input mobilePhone CountryCode: ");
+                    countryCode = scanner.next();
+                    System.out.println("input mobilePhone AreaCode: ");
+                    areaCode = scanner.next();
+                    System.out.println("input mobilePhone number: ");
+                    String mobileNumber = scanner.next();
+                    userPhones.put("mobile", new PhoneNumber(countryCode, areaCode, mobileNumber));
+                    break;
+                case ("x"):
+                    break;
+
+                default:
+                    System.out.println("input valid options: w/h/m/x");
+                    break;
+            }
+        } while (!choice.equalsIgnoreCase("x"));
+        return userPhones;
     }
 
 }

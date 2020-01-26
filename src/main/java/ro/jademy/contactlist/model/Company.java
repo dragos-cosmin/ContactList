@@ -26,10 +26,9 @@ public class Company {
     public Company(String name, Address address) {
         this.name = name;
         this.address = address;
-
-
-
     }
+
+    public Company(){}
 
     @Override
     public boolean equals(Object o) {
