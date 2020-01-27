@@ -16,6 +16,17 @@ import java.util.stream.Stream;
 public class Main {
 
     public static void main(String[] args) {
+        //create contactlist of users
+        //list contact list in natural order
+        //list contact list by given criteria
+        //display favorite list
+        //search by a given or multiple criteria
+
+
+
+
+
+
         Scanner scanner = new Scanner(System.in);
         // create a contact list of users
 
@@ -28,7 +39,7 @@ public class Main {
         long tInit, tFinal;
         do {
             System.out.println();
-            printMenu();
+            Menu.showMenu();
             System.out.println("Input option: ");
             opt = scanner.nextInt();
 
@@ -428,92 +439,9 @@ public class Main {
 
     }
 
+
     // Methods:
 
-
-    public static List<User> getUserList() {
-        // user 1
-        Map<String, PhoneNumber> u1phoneNumbers = new HashMap<>();
-        u1phoneNumbers.put("work", new PhoneNumber("021", "2204578"));
-        u1phoneNumbers.put("home", new PhoneNumber("021", "7548924"));
-        u1phoneNumbers.put("mobile", new PhoneNumber("0722", "125689"));
-
-        Address u1HomeAddress = new Address("Stefan cel Mare", 20, 4, "parter", "100066", "Bucharest", "Romania");
-        Address u1CompAdress = new Address("Magheru", 1, "12546", "Bucharest", "Romania");
-        Company u1Company = new Company("IBM", u1CompAdress);
-
-        User us1 = new User("Andrei", "Popescu", "danpopescu1@yahoo.com", 45, u1phoneNumbers, u1HomeAddress, "technician", u1Company, false);
-        us1.setId(1);
-
-        //user 2
-        Map<String, PhoneNumber> u2phoneNumbers = new HashMap<>();
-        u2phoneNumbers.put("work", new PhoneNumber("021", "7945658"));
-        u2phoneNumbers.put("home", new PhoneNumber("021", "2503056"));
-        u2phoneNumbers.put("mobile", new PhoneNumber("0724", "359897"));
-
-        Address u2HomeAddress = new Address("Dorobanti", 10, 8, "5", "123456", "Bucharest", "Romania");
-        Address u2CompAdress = new Address("Pipera", 5, "560055", "Bucharest", "Romania");
-        Company u2Company = new Company("Porche", u2CompAdress);
-
-        User us2 = new User("Andreea", "Zaharescu", "aiones89@gmail.com", 28, u2phoneNumbers, u2HomeAddress, "engineer", u2Company, false);
-        us2.setId(2);
-
-        //user 3
-        Map<String, PhoneNumber> u3phoneNumbers = new HashMap<>();
-        u3phoneNumbers.put("work", new PhoneNumber("021", "7945675"));
-        u3phoneNumbers.put("home", new PhoneNumber("021", "5528150"));
-        u3phoneNumbers.put("mobile", new PhoneNumber("0734", "125897"));
-
-        Address u3HomeAddress = new Address("Drumul Taberei", 125, 23, "6", "548796", "Bucharest", "Romania");
-        Address u3CompAdress = new Address("Pipera", 5, "560055", "Bucharest", "Romania");
-        Company u3Company = new Company("Porche", u3CompAdress);
-
-        User us3 = new User("Dana", "", "thetin45@yahoo.com", 35, u3phoneNumbers, u3HomeAddress, "accountant", u3Company, false);
-        us3.setId(3);
-
-        //user 4
-        Map<String, PhoneNumber> u4phoneNumbers = new HashMap<>();
-
-        u4phoneNumbers.put("home", new PhoneNumber("+40", "21", "2503056"));
-        u4phoneNumbers.put("mobile", new PhoneNumber("0724", "359897"));
-
-        Address u4HomeAddress = new Address("Eugen Botez", 24, 2, "1", "122589", "Bucharest", "Romania");
-
-        User us4 = new User("Ioana", "Toma", "tomna78@gmail.com", 21, u4phoneNumbers, u4HomeAddress, true);
-        us4.setId(4);
-
-        //user 5
-        Map<String, PhoneNumber> u5phoneNumbers = new HashMap<>();
-
-        u5phoneNumbers.put("home", new PhoneNumber("+40", "21", "2503056"));
-        u5phoneNumbers.put("mobile", new PhoneNumber("0724", "359897"));
-
-        Address u5HomeAddress = new Address("Eugen Botez", 24, 2, "1", "122589", "Bucharest", "Romania");
-
-        User us5 = new User("?", "!", "tomna78@gmail.com", 21, u4phoneNumbers, u4HomeAddress, false);
-        us5.setId(5);
-
-        //user 6
-        Map<String, PhoneNumber> u6phoneNumbers = new HashMap<>();
-
-        u6phoneNumbers.put("home", new PhoneNumber("+40", "21", "2503056"));
-        u6phoneNumbers.put("mobile", new PhoneNumber("0724", "359897"));
-
-        Address u6HomeAddress = new Address("Eugen Botez", 24, 2, "1", "122589", "Bucharest", "Romania");
-
-        User us6 = new User("@", "Coco", "tomna78@gmail.com", 21, u4phoneNumbers, u4HomeAddress, true);
-        us6.setId(6);
-
-        List<User> contactList = new ArrayList<>();
-        contactList.add(us1);
-        contactList.add(us2);
-        contactList.add(us3);
-        contactList.add(us4);
-        contactList.add(us5);
-        contactList.add(us6);
-        return contactList;
-
-    }
 
     public static List<User> getUserListFromFile(String userFileName) {
         List<User> contactList = new ArrayList<>();
@@ -606,22 +534,6 @@ public class Main {
         return header;
 
         }
-
-    public static void printMenu() {
-        System.out.println("   CONTACT LIST    ");
-        System.out.println("===================");
-        System.out.println("1. List contacts   ");
-        System.out.println("2. List favorites  ");
-        System.out.println("3. Details by id   ");
-        System.out.println("4. Search contact  ");
-        System.out.println("5. Add new contact ");
-        System.out.println("6. Edit contact    ");
-        System.out.println("7. Remove contact  ");
-        System.out.println("8. Statistics      ");
-        System.out.println("9. EXIT            ");
-        System.out.println("===================");
-
-    }
 
     public static List<User> searchUser(List<User> userList, String query) {
         Supplier<Stream<User>> userlistStreamSupplier = () -> userList.stream();

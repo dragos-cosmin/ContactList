@@ -4,3 +4,4 @@ INDEX|F_NAME|L_NAME|PHONE_NUMBERS|EMAIL|AGE|ADRESSES|COMPANY_NAME|JOB_TITLE|IS_F
 3|Toma|Zaharia|work_+40_21_2205897,mobile_+40_733_547632,home_+40_21_6589785|zaha_tom87@yahoo.com|45|home_Doamna Oltea_45_3_2_258687_Bucuresti_Romania,work_Dobrota_2_1_parter_258687_Bucuresti_Romania|ROSAL|manager|false
 4|Dani|Ursulescu|work_+40_21_2501478,mobile_+40_723_299875,home_+40_344_141211|ursu_brun98@yahoo.com|21|home_Republicii_18_19_5_100077_Ploiesti_ROMANIA,work_Pipera_10_15_2_210047_Bucuresti_ROMANIA|ORACLE|junior developer|true
 5|Claude|Francois|work_+33_76_78459687,mobile_+33_74_23569844,home_+33_79_65478872|claude_fr@yahoo.com|29|home_av. Colmar_24_62_20_7501487_Paris_FRANCE,work_av. Bordeaux_1_1_0_721200_Maison Laffite_FRANCE|RENAULT|montagist|false
+6|Dan|Xander|mobile_+32_477_358798|xander_cage@yahoo.com|22|home_Ion Creanga_1_25_6_123456_Bucuresti_ROMANIA,work_Poli_58_0_0_547896_Rm_Valcea|x|manager|false
