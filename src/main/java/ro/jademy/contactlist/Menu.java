@@ -12,6 +12,22 @@ public class Menu {
         this.userService = userService;
     }
 
+    public Scanner getScanner() {
+        return scanner;
+    }
+
+    public void setScanner(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+    public UserService getUserService() {
+        return userService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
     public static void showMenu() {
         System.out.println("   CONTACT LIST    ");
         System.out.println("===================");
@@ -27,6 +43,7 @@ public class Menu {
         System.out.println("===================");
 
     }
+
 
 
 

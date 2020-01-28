@@ -5,6 +5,9 @@ import ro.jademy.contactlist.model.Address;
 import ro.jademy.contactlist.model.Company;
 import ro.jademy.contactlist.model.PhoneNumber;
 import ro.jademy.contactlist.model.User;
+import ro.jademy.contactlist.service.FileUserService;
+import ro.jademy.contactlist.service.MemoryUserService;
+import ro.jademy.contactlist.service.UserService;
 
 import java.io.*;
 import java.util.*;
@@ -21,18 +24,15 @@ public class Main {
         //list contact list by given criteria
         //display favorite list
         //search by a given or multiple criteria
-
-
-
-
-
+        // display some statistics for the contact list
 
         Scanner scanner = new Scanner(System.in);
         // create a contact list of users
 
-
         List<User> contactList = getUserListFromFile("contactlist.csv");
         String userHeader=readHeaderFromFile("contactlist.csv");
+        FileUserService fileUserService=new FileUserService("contactslist.csv");
+        fileUserService.setContacts(contactList);
 
         // list contact list in natural order
         int opt;
@@ -91,14 +91,27 @@ public class Main {
                     System.out.println("input index: ");
                     Integer requestIndex = scanner.nextInt();
                     tInit = System.nanoTime();
-                    try {
 
-                        User requestUser = contactList.stream().filter(x -> requestIndex.equals(x.getId())).findAny().get();
+                   // version prior to pattern design
+
+                    // try {
+
+                   //     User requestUser = contactList.stream().filter(x -> requestIndex.equals(x.getId())).findAny().get();
+                   //     requestUser.printUserDetails();
+                   // } catch (NoSuchElementException e) {
+                   //     System.out.println("The user has been previously removed, try another");
+
+                    // version after pattern design
+
+                    Optional<User>optionalUser=new Menu(fileUserService).getUserService().getContactbyId(requestIndex);
+                    if (optionalUser.isPresent()) {
+                        User requestUser = optionalUser.get();
                         requestUser.printUserDetails();
-                    } catch (NoSuchElementException e) {
+                    } else {
+
                         System.out.println("The user has been previously removed, try another");
-                        break;
                     }
+
                     System.out.println();
                     tFinal = System.nanoTime();
                     System.out.println();
