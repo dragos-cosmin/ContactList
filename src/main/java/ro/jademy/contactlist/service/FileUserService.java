@@ -94,7 +94,7 @@ public class FileUserService implements UserService {
             // overwrite the whole list of contacts in the file
             writeToFile();
 
-        }
+        }else System.out.println("User does not exist, try another");
     }
 
     @Override
@@ -261,7 +261,7 @@ public class FileUserService implements UserService {
         }
     }
 
-    private void backupFile() {
+    public void backupFile() {
 
         if (contactsFile.exists()) {
             Date now = new Date();
