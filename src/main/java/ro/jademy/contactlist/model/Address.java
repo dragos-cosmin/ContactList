@@ -1,7 +1,6 @@
 package ro.jademy.contactlist.model;
 
 import java.util.Objects;
-import java.util.Scanner;
 
 public class Address {
 
@@ -25,11 +24,11 @@ public class Address {
     }
 
     public Address(String streetName, Integer streetNumber, String zipCode, String city, String country) {
-        this.streetName = streetName;
-        this.streetNumber = streetNumber;
-        this.zipCode = zipCode;
-        this.city = city;
-        this.country = country;
+        this(streetName,streetNumber,null,null,null,city,country);
+    }
+
+    public Address(String streetName, Integer streetNumber, String city, String country){
+        this(streetName,streetNumber,null,city,country);
     }
 
     public Address(){
@@ -124,26 +123,6 @@ public class Address {
                 '}';
     }
 
-    public static Address createAdressFromKeyboard (String adresstype){
-        Scanner scanner=new Scanner(System.in);
-        System.out.println("Input "+adresstype+" adress:");
-        System.out.println("Input street name: ");
-        String streetName=scanner.nextLine();
-        System.out.println("Input house number: ");
-        Integer streetNumber=scanner.nextInt();
-        System.out.println("Input apartment number: ");
-        Integer apartmentNumber=scanner.nextInt();
-        System.out.println("Input floor: ");
-        String floor=scanner.next();
-        System.out.println("Input Zip Code: ");
-        String zipCode=scanner.next();
-        System.out.println("Input cityname: ");
-        String city=scanner.next();
-        System.out.println("Input country: ");
-        String country=scanner.next();
-        return new Address(streetName,streetNumber,apartmentNumber,floor,zipCode,city,country);
-
-    }
 
 
 

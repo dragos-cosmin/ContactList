@@ -1,7 +1,5 @@
 package ro.jademy.contactlist.model;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -12,15 +10,22 @@ public class PhoneNumber {
     private String number; // ex: 740123456
 
     public PhoneNumber(String countryCode, String areaCode, String number) {
-        this.countryCode = countryCode;
-        this.areaCode=areaCode;
-        this.number = number;
+        this.countryCode = countryCode; //ex: +40
+        this.areaCode=areaCode; // ex: 244, 722
+        this.number = number; //ex: 2105689 457856
     }
 
     public PhoneNumber(String areaCode, String number) {
         this.areaCode = areaCode;
         this.number = number;
     }
+
+    public PhoneNumber(String number){
+        this.countryCode="+40"; //implicit for Romania
+        this.number=number;
+    }
+
+
 
     public String getCountryCode() {
         return countryCode;

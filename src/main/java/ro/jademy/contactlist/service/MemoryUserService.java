@@ -6,6 +6,9 @@ import ro.jademy.contactlist.model.PhoneNumber;
 import ro.jademy.contactlist.model.User;
 
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MemoryUserService implements UserService {
     private List<User> contacts = new ArrayList<>();
@@ -70,10 +73,42 @@ public class MemoryUserService implements UserService {
     @Override
     public List<User> search(String query) {
 
-        // TODO: implement method
+        Supplier<Stream<User>> userlistStreamSupplier = () -> contacts.stream();
 
-        return new ArrayList<>();
+        List<User> resultFirsName = userlistStreamSupplier.get()
+                .filter(user -> user.getFirstName() != null)
+                .filter(user -> user.getFirstName().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        List<User> resultLastName = userlistStreamSupplier.get()
+                .filter(user -> user.getLastName() != null)
+                .filter(user -> user.getLastName().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        List<User> resultCompany = userlistStreamSupplier.get()
+                .filter(user -> user.getCompany() != null)
+                .filter(user -> user.getCompany().getName().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        List<User> resultJobTitle = userlistStreamSupplier.get()
+                .filter(user -> user.getJobTitle() != null)
+                .filter(user -> user.getJobTitle().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        List<User> resultPhone = userlistStreamSupplier.get()
+                .filter(user -> user.getPhoneNumbers() != null)
+                .filter(user -> user.getPhoneNumbers().values()
+                        .stream()
+                        .filter(phoneNumber -> phoneNumber.getNumber() != null)
+                        .map(phoneNumber -> phoneNumber.getCountryCode() + phoneNumber.getAreaCode() + phoneNumber.getNumber())
+                        .anyMatch(phoneNumber -> phoneNumber.contains(query)))
+                .collect(Collectors.toList());
+        List<User> resultList = new ArrayList<>();
+        resultList.addAll(resultFirsName);
+        resultList.addAll(resultLastName);
+        resultList.addAll(resultCompany);
+        resultList.addAll(resultJobTitle);
+        resultList.addAll(resultPhone);
+        return resultList;
+
     }
+
 
     private List<User> initContacts() {
         // user 1

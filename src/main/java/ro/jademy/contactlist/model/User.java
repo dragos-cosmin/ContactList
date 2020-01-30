@@ -1,15 +1,13 @@
 package ro.jademy.contactlist.model;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class User implements Comparable<User> {
 
+    private static final String DEFAULT_PHONE_NUMBER_GROUP="home";
     private int id;
     private String firstName;
     private String lastName;
@@ -34,7 +32,10 @@ public class User implements Comparable<User> {
         this.jobTitle = jobTitle;
         this.company = company;
         this.isFavorite = isFavorite;
+    }
 
+    public User (String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, String jobTitle, Company company){
+        this (firstName,lastName,email,age,phoneNumbers,address,jobTitle,company,false);
     }
 
     public User(String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, boolean isFavorite) {
@@ -49,6 +50,18 @@ public class User implements Comparable<User> {
 
     public User(){}
 
+    public User (String firstName, String lastName, PhoneNumber phoneNumber, boolean isFavorite){
+        this(firstName,lastName,null,null,new HashMap<>(),null,null,null,isFavorite);
+        this.phoneNumbers.put(DEFAULT_PHONE_NUMBER_GROUP,phoneNumber);  //add the phonenumber to a default group
+    }
+
+    public User (String firstName, String lastName, PhoneNumber phoneNumber){ //simple constructor requiring a phonenumber
+        this(firstName,lastName,phoneNumber,false);
+    }
+
+    public User (String firstName, String lastName, String phoneNumber){ // simplest constructor
+        this(firstName,lastName,new PhoneNumber(phoneNumber),false);
+    }
     public String getFirstName() {
         return firstName;
     }

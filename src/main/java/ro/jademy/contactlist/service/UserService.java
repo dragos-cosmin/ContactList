@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface UserService {
+
     List<User> getContacts();
 
     Optional<User> getContactbyId(int userId);
@@ -27,9 +28,6 @@ public interface UserService {
     void removeContact(int userId);
 
     List<User> search(String query);
-
-
-
 
 
 }

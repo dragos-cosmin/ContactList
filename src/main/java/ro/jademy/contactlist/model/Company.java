@@ -7,6 +7,18 @@ public class Company {
     private String name;
     private Address address;
 
+    public Company(String name, Address address) {
+        this.name = name;
+        this.address = address;
+    }
+
+    public Company(String name) {
+        this(name,null);   // varianta incare e apelat constructorul implicit cu toti parametrii si e particularizat
+    }
+
+    public Company(){}
+
+
     public String getName() {
         return name;
     }
@@ -23,12 +35,6 @@ public class Company {
         this.address = address;
     }
 
-    public Company(String name, Address address) {
-        this.name = name;
-        this.address = address;
-    }
-
-    public Company(){}
 
     @Override
     public boolean equals(Object o) {
