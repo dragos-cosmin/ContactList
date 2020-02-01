@@ -6,9 +6,17 @@ import ro.jademy.contactlist.model.PhoneNumber;
 import ro.jademy.contactlist.model.User;
 import ro.jademy.contactlist.service.UserService;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Menu {
 
@@ -454,9 +462,22 @@ public class Menu {
                 scanner.nextLine();
                 switch (option){
                     case 1:
+                       try (Stream<Path>fileStream= Files.walk(Paths.get("C:\\Users\\Dragos\\My documents\\Java Bootcamp\\ContactList"))) {
+                             List<File> fileNames = fileStream
+                                     .filter(f->f.getFileName().toString().contains("backup"))
+                                     .map(Path::toFile)
+                                     .collect(Collectors.toMap(Function.identity(),File::lastModified))
+                                     .entrySet()
+                                     .stream()
+                                     .sorted(Map.Entry.comparingByValue())
+                                     .map(Map.Entry::getKey)
+                                     .collect(Collectors.toList());
+                              fileNames.stream().map(file -> file.getName()+" last modified "+ new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(file.lastModified()))).forEach(System.out::println);
 
 
-
+                       }catch (IOException ex){
+                           System.out.println(ex.fillInStackTrace());
+                       }
 
 
 
