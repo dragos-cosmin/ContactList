@@ -264,9 +264,6 @@ public class FileUserService implements UserService {
     public void backupFile() {
 
         if (contactsFile.exists()) {
-          //  Date now = new Date();
-          //  SimpleDateFormat formatter = new SimpleDateFormat("yy_MM_dd_HH_mm_ss");
-          //  String dateToString = formatter.format(now);
             String unicId=UUID.randomUUID().toString();
 
             File backupFile = new File("contactfile_backup" + unicId + ".csv");

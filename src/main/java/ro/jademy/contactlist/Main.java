@@ -30,7 +30,7 @@ public class Main {
             option = scanner.nextInt();
             menu.solveMenuTasks(option);
 
-        } while (option != 9);
+        } while (option != 0);
 
     }
 
