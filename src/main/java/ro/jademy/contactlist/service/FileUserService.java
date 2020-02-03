@@ -6,7 +6,6 @@ import ro.jademy.contactlist.model.PhoneNumber;
 import ro.jademy.contactlist.model.User;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -281,14 +280,41 @@ public class FileUserService implements UserService {
             }
             try (BufferedWriter out = new BufferedWriter(new FileWriter(backupFile, false))) {
                 for (String s: fileLines) {
-                    out.newLine();
                     out.append(s);
+                    out.newLine();
                 }
             } catch (IOException e) {
                 System.out.println("Cannot write to file\n" + e);
             }
 
         }
+    }
+    public void restoreFromBackupFile(String backupFileName) {
+
+        if (!contactsFile.exists()) {
+                try {
+                    contactsFile.createNewFile();
+                } catch (IOException e){
+                    System.out.println(e.fillInStackTrace());
+                }
+
+        }
+        List<String> fileLines = new ArrayList<>();
+        try (BufferedReader in = new BufferedReader(new FileReader(backupFileName))) {
+            fileLines = in.lines().collect(Collectors.toList());
+        } catch (IOException ex) {
+            System.out.println("Cannot read from file\n" + ex);
+        }
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(contactsFile, false))) {
+            for (String s: fileLines) {
+                out.append(s);
+                out.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Cannot write to file\n" + e);
+        }
+        contacts.clear();
+        getContacts();
     }
 
 

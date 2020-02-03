@@ -246,7 +246,7 @@ public class Menu {
                     System.out.println("The user with this index has been previously removed, try another");
 
                 }
-                User copyOfUser=new User(requestUser.getFirstName(),requestUser.getLastName(),requestUser.getEmail(),requestUser.getAge(),requestUser.getPhoneNumbers(),requestUser.getAddress(),requestUser.getJobTitle(),requestUser.getCompany(),requestUser.isFavorite());
+                User copyOfUser = new User(requestUser.getFirstName(), requestUser.getLastName(), requestUser.getEmail(), requestUser.getAge(), requestUser.getPhoneNumbers(), requestUser.getAddress(), requestUser.getJobTitle(), requestUser.getCompany(), requestUser.isFavorite());
                 do {
                     requestUser.printUserDetails();
                     System.out.println();
@@ -274,10 +274,10 @@ public class Menu {
                             copyOfUser.setLastName(lastName);
                             break;
                         case 3:
-                            Company company=new Company();
+                            Company company = new Company();
                             System.out.println("Input new Company name: ");
                             String companyName = scanner.nextLine();
-                            if (copyOfUser.getCompany()!=null){
+                            if (copyOfUser.getCompany() != null) {
                                 copyOfUser.getCompany().setName(companyName);
                             } else {
                                 copyOfUser.setCompany(company);
@@ -417,7 +417,7 @@ public class Menu {
                     }
                 } while (option != 0);
                 //edit contacts method
-                userService.editContact(requestIndex,copyOfUser.getFirstName(),copyOfUser.getLastName(),copyOfUser.getEmail(),copyOfUser.getAge(),copyOfUser.getPhoneNumbers(),copyOfUser.getAddress(),copyOfUser.getJobTitle(),copyOfUser.getCompany(),copyOfUser.isFavorite());
+                userService.editContact(requestIndex, copyOfUser.getFirstName(), copyOfUser.getLastName(), copyOfUser.getEmail(), copyOfUser.getAge(), copyOfUser.getPhoneNumbers(), copyOfUser.getAddress(), copyOfUser.getJobTitle(), copyOfUser.getCompany(), copyOfUser.isFavorite());
 
                 System.out.println();
                 tFinal = System.nanoTime();
@@ -459,37 +459,40 @@ public class Menu {
                 break;
             case 9:
                 int backupOption;
-                Map<Integer,String> fileMap=new HashMap<>();
+                Map<Integer, String> fileMap = new HashMap<>();
                 do {
                     showBackupMenu();
                     System.out.println();
                     System.out.println("Input option: ");
-                    backupOption=scanner.nextInt();
+                    backupOption = scanner.nextInt();
                     scanner.nextLine();
-                    switch (backupOption){
+                    switch (backupOption) {
                         case 1:
-                           int j=1;
-                            try (Stream<Path>fileStream= Files.walk(Paths.get("C:\\Users\\Dragos\\My documents\\Java Bootcamp\\ContactList"))) {
+                            int j = 1;
+                            //String absolutePathName="C:\\Users\\Dragos\\My documents\\Java Bootcamp\\ContactList";
+                            String FullAbsolutePathName = (((FileUserService) userService).getContactsFile().getAbsolutePath());
+                            String absolutePathName = FullAbsolutePathName.substring(0, FullAbsolutePathName.lastIndexOf("\\"));
+
+                            try (Stream<Path> fileStream = Files.walk(Paths.get(absolutePathName))) {
                                 List<File> fileNames = fileStream
-                                        .filter(f->f.getFileName().toString().contains("backup"))
+                                        .filter(f -> f.getFileName().toString().contains("backup"))
                                         .map(Path::toFile)
-                                        .collect(Collectors.toMap(Function.identity(),File::lastModified))
+                                        .collect(Collectors.toMap(Function.identity(), File::lastModified))
                                         .entrySet()
                                         .stream()
                                         .sorted(Map.Entry.comparingByValue())
                                         .map(Map.Entry::getKey)
                                         .collect(Collectors.toList());
-                              //  fileNames.stream().map(file -> file.getName()+" last modified "+ new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(file.lastModified()))).forEach(System.out::println);
 
-                                for (File f :fileNames ) {
-                                    System.out.println(j+"."+f.getName()+" last modified "+new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(f.lastModified())));
-                                    fileMap.put(j,f.getName());
+                                for (File f: fileNames) {
+                                    System.out.println(j + "." + f.getName() + " last modified " + new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(f.lastModified())));
+                                    fileMap.put(j, f.getName());
                                     j++;
 
                                 }
                                 System.out.println();
 
-                            }catch (IOException ex){
+                            } catch (IOException ex) {
                                 System.out.println(ex.fillInStackTrace());
                             }
                             break;
@@ -497,37 +500,33 @@ public class Menu {
                             //restore backups from file
                             System.out.println("restore backups from file");
                             System.out.println("Input index: ");
-                            Integer backupIndex=scanner.nextInt();
+                            Integer backupIndex = scanner.nextInt();
                             scanner.nextLine();
 
-                           Optional<Map.Entry<Integer,String>> result= fileMap.entrySet().stream()
+                            Optional<Map.Entry<Integer, String>> result = fileMap.entrySet().stream()
                                     .filter(integerStringEntry -> integerStringEntry.getKey().equals(backupIndex))
                                     .findFirst();
-                           Map.Entry<Integer,String>entryResult=null;
-                           if (result.isPresent()){
-                               entryResult=result.get();
-                           } else {
-                               System.out.println("Nothing found");
-                           }
-                            System.out.println("file name is: "+entryResult.getValue());
-
-
-
-
-
-
-
+                            Map.Entry<Integer, String> entryResult = null;
+                            if (result.isPresent()) {
+                                entryResult = result.get();
+                            } else {
+                                System.out.println("Nothing found");
+                            }
+                            String backupFileName = entryResult.getValue();
+                            System.out.println("file name is: " + backupFileName);
+                            ((FileUserService) userService).restoreFromBackupFile(backupFileName);
 
 
                             break;
                         case 3:
                             //purge old backups
                             System.out.println("purge old backups");
+
                             break;
                         case 4:
                             //create backup now
                             System.out.println("Do you want to create a backup now? Y/N");
-                            if (scanner.nextLine().equalsIgnoreCase("Y")){
+                            if (scanner.nextLine().equalsIgnoreCase("Y")) {
                                 ((FileUserService) userService).backupFile();
                             }
 
@@ -535,13 +534,13 @@ public class Menu {
                         case 0:
                             break;
                         default:
-                            System.out.println("Input only available options 1,2,3,0");
+                            System.out.println("Input only available options 1,2,3,4,0");
                             break;
                     }
 
-                } while (backupOption!=0);
+                } while (backupOption != 0);
 
-              break;
+                break;
 
             case 0:
 
