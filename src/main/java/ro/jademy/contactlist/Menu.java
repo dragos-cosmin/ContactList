@@ -466,12 +466,13 @@ public class Menu {
                     System.out.println("Input option: ");
                     backupOption = scanner.nextInt();
                     scanner.nextLine();
+                    String FullAbsolutePathName = (((FileUserService) userService).getContactsFile().getAbsolutePath());
+                    String absolutePathName = FullAbsolutePathName.substring(0, FullAbsolutePathName.lastIndexOf("\\"));
+
                     switch (backupOption) {
                         case 1:
                             int j = 1;
                             //String absolutePathName="C:\\Users\\Dragos\\My documents\\Java Bootcamp\\ContactList";
-                            String FullAbsolutePathName = (((FileUserService) userService).getContactsFile().getAbsolutePath());
-                            String absolutePathName = FullAbsolutePathName.substring(0, FullAbsolutePathName.lastIndexOf("\\"));
 
                             try (Stream<Path> fileStream = Files.walk(Paths.get(absolutePathName))) {
                                 List<File> fileNames = fileStream
@@ -520,8 +521,13 @@ public class Menu {
                             break;
                         case 3:
                             //purge old backups
-                            System.out.println("purge old backups");
-
+                            System.out.println("How many of the last backup files do you want to keep?");
+                            int keptFiles=scanner.nextInt();
+                            scanner.nextLine();
+                            List<File> backupFiles=((FileUserService)userService).getFilesFromDir(absolutePathName,"backup");
+                            for (int i=backupFiles.size()-keptFiles-1;i>=0;i--){
+                                backupFiles.get(i).delete();
+                            }
                             break;
                         case 4:
                             //create backup now

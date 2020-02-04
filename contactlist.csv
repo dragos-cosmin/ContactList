@@ -5,3 +5,5 @@ INDEX|F_NAME|L_NAME|PHONE_NUMBERS|EMAIL|AGE|ADRESSES|COMPANY_NAME|JOB_TITLE|IS_F
 4|Dani|Ursulescu|work_+40_21_2501478,mobile_+40_723_299875,home_+40_344_141211|ursu_brun98@yahoo.com|21|home_Republicii_18_19_5_100077_Ploiesti_ROMANIA,work_Pipera_10_15_2_210047_Bucuresti_ROMANIA|ORACLE|junior developer|true
 6|Alexandru|Pascu|work_+40_21_2548733,mobile_+40_755_326654||52|home_Simion Barnutiu_6_1_ground_100021_Ploiesti_Romania,work_Progresului_120_25_4_210558_Bucuresti_Romania|panasonic|key account manager|false
 7|Cristian|Vasilescu|mobile_+40_755_322111|cristi_vas98@yahoo.com|36|home_calea Mosilor_20_2_1_255411_Bucuresti_Romania,work_Magheru_50_25_5_2356987_Bucuresti_Romania|Tarom||false
+8|Paul|Vasilescu|work_+40_244_254879,mobile_+40_755_332651|vasi_paul52@gml.ro|42|home_Gh Doja_2_1_parter_100052_Ploiesti_Romania,work_DN1_242_0_parter_100022_Ploiesti_Romania|Mercury Lighting|sales rep|false
+9|Dan|Ivanescu|mobile_+40_733_652411|ivanescu9@gmail.com|40|home_Alexandru Odobescu_44_1_parter_100098_Ploiesti_Romania|||false

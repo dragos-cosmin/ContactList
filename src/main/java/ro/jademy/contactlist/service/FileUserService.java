@@ -6,7 +6,11 @@ import ro.jademy.contactlist.model.PhoneNumber;
 import ro.jademy.contactlist.model.User;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -315,6 +319,28 @@ public class FileUserService implements UserService {
         }
         contacts.clear();
         getContacts();
+    }
+
+    public List<File> getFilesFromDir(String fullAbsolutePathName, String containingName){
+        List<File> resultFiles=new ArrayList<>();
+        try (Stream<Path> fileStream = Files.walk(Paths.get(fullAbsolutePathName))) {
+             resultFiles = fileStream
+                    .filter(f -> f.getFileName().toString().contains(containingName))
+                    .map(Path::toFile)
+                    .collect(Collectors.toMap(Function.identity(), File::lastModified))
+                    .entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+
+        } catch (IOException ex) {
+            System.out.println(ex.fillInStackTrace());
+        }
+
+
+
+            return resultFiles;
     }
 
 
