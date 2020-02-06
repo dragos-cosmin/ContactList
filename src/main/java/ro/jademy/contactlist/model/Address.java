@@ -123,6 +123,23 @@ public class Address {
                 '}';
     }
 
+    public Address verifyAdress(Address address){
+        Address resultAdress=new Address();
+        if (address.getStreetName()==null){
+            resultAdress.setStreetName("");
+        } resultAdress.setStreetName(address.streetName);
+        if (address.getStreetNumber()==null){
+            resultAdress.setStreetNumber(0);
+        } resultAdress.setStreetNumber(address.streetNumber);
+        if (address.getApartmentNumber()==null){
+            resultAdress.setApartmentNumber(0);
+        } resultAdress.setApartmentNumber(address.apartmentNumber);
+
+
+
+        return resultAdress;
+    }
+
 
 
 

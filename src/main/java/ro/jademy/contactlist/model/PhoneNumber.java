@@ -22,8 +22,16 @@ public class PhoneNumber {
 
     public PhoneNumber(String number){
         this.countryCode="+40"; //implicit for Romania
-        this.number=number;
+        if (number.substring(1,3).equalsIgnoreCase("21")){
+            this.areaCode="21";
+            this.number=number.substring(3,number.length());
+        }else {
+            this.areaCode=number.substring(1,4);
+            this.number=number.substring(4,number.length());
+        }
     }
+
+    public PhoneNumber(){}
 
 
 

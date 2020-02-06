@@ -8,16 +8,10 @@ import ro.jademy.contactlist.service.FileUserService;
 import ro.jademy.contactlist.service.UserService;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Menu {
 
@@ -159,8 +153,14 @@ public class Menu {
                 System.out.println("Input Last Name: ");
                 String lastName = scanner.nextLine();
                 System.out.println("Input age: ");
-                Integer age = scanner.nextInt();
-                scanner.nextLine();
+                String ageString=scanner.nextLine();
+                Integer age;
+                if (ageString.equalsIgnoreCase("")){
+                    age=null;
+                }else {
+                    age = Integer.parseInt(ageString);
+                }
+
                 System.out.println("Input email: ");
                 String email = scanner.nextLine();
                 Map<String, PhoneNumber> userPhones;
@@ -204,6 +204,7 @@ public class Menu {
                     }
 
                     System.out.println("You added new user: \n");
+                    System.out.println();
                     newUser.printUserDetails();
                     System.out.println();
                     System.out.println("user id: " + newUser.getId());
@@ -226,9 +227,7 @@ public class Menu {
                     System.out.println();
                     System.out.println("user id: " + newUserNoComp.getId());
                     userService.addContact(newUserNoComp);
-
                 }
-
 
                 break;
             case 6:
@@ -251,6 +250,7 @@ public class Menu {
                     requestUser.printUserDetails();
                     System.out.println();
                     System.out.println("Input field you want to modify: ");
+                    System.out.println();
                     System.out.println(" First name:      1");
                     System.out.println(" Last name:       2");
                     System.out.println(" Company name:    3");
@@ -471,35 +471,23 @@ public class Menu {
 
                     switch (backupOption) {
                         case 1:
+                            //list backup files, file names and last modified date, sorted oldest first
                             int j = 1;
-                            //String absolutePathName="C:\\Users\\Dragos\\My documents\\Java Bootcamp\\ContactList";
+                            List<File> fileNames = ((FileUserService) userService).getFilesFromDir(absolutePathName, "backup");
 
-                            try (Stream<Path> fileStream = Files.walk(Paths.get(absolutePathName))) {
-                                List<File> fileNames = fileStream
-                                        .filter(f -> f.getFileName().toString().contains("backup"))
-                                        .map(Path::toFile)
-                                        .collect(Collectors.toMap(Function.identity(), File::lastModified))
-                                        .entrySet()
-                                        .stream()
-                                        .sorted(Map.Entry.comparingByValue())
-                                        .map(Map.Entry::getKey)
-                                        .collect(Collectors.toList());
+                            for (File f: fileNames) {
+                                System.out.println(j + "." + f.getName() + " last modified " + new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(f.lastModified())));
+                                fileMap.put(j, f.getName());
+                                j++;
 
-                                for (File f: fileNames) {
-                                    System.out.println(j + "." + f.getName() + " last modified " + new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(f.lastModified())));
-                                    fileMap.put(j, f.getName());
-                                    j++;
-
-                                }
-                                System.out.println();
-
-                            } catch (IOException ex) {
-                                System.out.println(ex.fillInStackTrace());
                             }
+                            System.out.println();
+
                             break;
                         case 2:
                             //restore backups from file
                             System.out.println("restore backups from file");
+                            ((FileUserService) userService).printFileNames("backup");
                             System.out.println("Input index: ");
                             Integer backupIndex = scanner.nextInt();
                             scanner.nextLine();
@@ -522,10 +510,10 @@ public class Menu {
                         case 3:
                             //purge old backups
                             System.out.println("How many of the last backup files do you want to keep?");
-                            int keptFiles=scanner.nextInt();
+                            int keptFiles = scanner.nextInt();
                             scanner.nextLine();
-                            List<File> backupFiles=((FileUserService)userService).getFilesFromDir(absolutePathName,"backup");
-                            for (int i=backupFiles.size()-keptFiles-1;i>=0;i--){
+                            List<File> backupFiles = ((FileUserService) userService).getFilesFromDir(absolutePathName, "backup");
+                            for (int i = backupFiles.size() - keptFiles - 1; i >= 0; i--) {
                                 backupFiles.get(i).delete();
                             }
                             break;
@@ -568,11 +556,21 @@ public class Menu {
         System.out.println("Input street name: ");
         String streetName = scanner.nextLine();
         System.out.println("Input house number: ");
-        Integer streetNumber = scanner.nextInt();
-        scanner.nextLine();
+        Integer streetNumber;
+        String streetNumberStr=scanner.nextLine();
+        if (streetNumberStr.isEmpty()){
+            streetNumber=null;
+        }else {
+            streetNumber=Integer.parseInt(streetNumberStr);
+        }
         System.out.println("Input apartment number: ");
-        Integer apartmentNumber = scanner.nextInt();
-        scanner.nextLine();
+        Integer apartmentNumber;
+        String apartmentStr = scanner.nextLine();
+        if (apartmentStr.isEmpty()){
+            apartmentNumber=null;
+        }else {
+            apartmentNumber=Integer.parseInt(apartmentStr);
+        }
         System.out.println("Input floor: ");
         String floor = scanner.nextLine();
         System.out.println("Input Zip Code: ");
@@ -582,6 +580,24 @@ public class Menu {
         System.out.println("Input country: ");
         String country = scanner.nextLine();
         return new Address(streetName, streetNumber, apartmentNumber, floor, zipCode, city, country);
+
+    }
+
+    public static PhoneNumber getPhoneFromKeyboard() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Is it a local phonenumber? Y/N");
+        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+            System.out.println("Enter phonenumber in local format: ");
+            return new PhoneNumber(scanner.nextLine());
+        } else {
+            System.out.println("input Country Code: ");
+            String countryCode = scanner.nextLine();
+            System.out.println("input Area Code: ");
+            String areaCode = scanner.nextLine();
+            System.out.println("input Number: ");
+            String number = scanner.nextLine();
+            return new PhoneNumber(countryCode, areaCode, number);
+        }
 
     }
 
@@ -595,31 +611,13 @@ public class Menu {
 
             switch (choice.toLowerCase()) {
                 case "w":
-                    System.out.println("input workPhone CountryCode: ");
-                    String countryCode = scanner.nextLine();
-                    System.out.println("input workPhone AreaCode: ");
-                    String areaCode = scanner.nextLine();
-                    System.out.println("input workPhone number: ");
-                    String workNumber = scanner.nextLine();
-                    userPhones.put("work", new PhoneNumber(countryCode, areaCode, workNumber));
+                    userPhones.put("work", getPhoneFromKeyboard());
                     break;
                 case "h":
-                    System.out.println("input homePhone CountryCode: ");
-                    countryCode = scanner.nextLine();
-                    System.out.println("input homePhone AreaCode: ");
-                    areaCode = scanner.nextLine();
-                    System.out.println("input homePhone number: ");
-                    String homeNumber = scanner.nextLine();
-                    userPhones.put("home", new PhoneNumber(countryCode, areaCode, homeNumber));
+                    userPhones.put("home", getPhoneFromKeyboard());
                     break;
                 case "m":
-                    System.out.println("input mobilePhone CountryCode: ");
-                    countryCode = scanner.nextLine();
-                    System.out.println("input mobilePhone AreaCode: ");
-                    areaCode = scanner.nextLine();
-                    System.out.println("input mobilePhone number: ");
-                    String mobileNumber = scanner.nextLine();
-                    userPhones.put("mobile", new PhoneNumber(countryCode, areaCode, mobileNumber));
+                    userPhones.put("mobile", getPhoneFromKeyboard());
                     break;
                 case ("x"):
                     break;

@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 public class User implements Comparable<User> {
 
-    private static final String DEFAULT_PHONE_NUMBER_GROUP="home";
+    private static final String DEFAULT_PHONE_NUMBER_GROUP = "home";
     private int id;
     private String firstName;
     private String lastName;
@@ -34,8 +34,8 @@ public class User implements Comparable<User> {
         this.isFavorite = isFavorite;
     }
 
-    public User (String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, String jobTitle, Company company){
-        this (firstName,lastName,email,age,phoneNumbers,address,jobTitle,company,false);
+    public User(String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, String jobTitle, Company company) {
+        this(firstName, lastName, email, age, phoneNumbers, address, jobTitle, company, false);
     }
 
     public User(String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, boolean isFavorite) {
@@ -48,20 +48,22 @@ public class User implements Comparable<User> {
         this.isFavorite = isFavorite;
     }
 
-    public User(){}
-
-    public User (String firstName, String lastName, PhoneNumber phoneNumber, boolean isFavorite){
-        this(firstName,lastName,null,null,new HashMap<>(),null,null,null,isFavorite);
-        this.phoneNumbers.put(DEFAULT_PHONE_NUMBER_GROUP,phoneNumber);  //add the phonenumber to a default group
+    public User() {
     }
 
-    public User (String firstName, String lastName, PhoneNumber phoneNumber){ //simple constructor requiring a phonenumber
-        this(firstName,lastName,phoneNumber,false);
+    public User(String firstName, String lastName, PhoneNumber phoneNumber, boolean isFavorite) {
+        this(firstName, lastName, null, null, new HashMap<>(), null, null, null, isFavorite);
+        this.phoneNumbers.put(DEFAULT_PHONE_NUMBER_GROUP, phoneNumber);  //add the phonenumber to a default group
     }
 
-    public User (String firstName, String lastName, String phoneNumber){ // simplest constructor
-        this(firstName,lastName,new PhoneNumber(phoneNumber),false);
+    public User(String firstName, String lastName, PhoneNumber phoneNumber) { //simple constructor requiring a phonenumber
+        this(firstName, lastName, phoneNumber, false);
     }
+
+    public User(String firstName, String lastName, String phoneNumber) { // simplest constructor
+        this(firstName, lastName, new PhoneNumber(phoneNumber), false);
+    }
+
     public String getFirstName() {
         return firstName;
     }
@@ -166,28 +168,65 @@ public class User implements Comparable<User> {
 
     @Override
     public String toString() {
-        String mapToString="";
-        String adressToString="";
-        String userToString="";
-        StringJoiner joinerPhone=new StringJoiner(",");
-        StringJoiner joinerUserList=new StringJoiner("|");
-        StringJoiner joinerHomeAddress=new StringJoiner("_");
-        StringJoiner joinerWorkAddress=new StringJoiner("_");
-        for (Map.Entry<String,PhoneNumber> mapEntry :phoneNumbers.entrySet() ) {
-            mapToString=(mapEntry.getKey()+"_"+mapEntry.getValue().getCountryCode()+"_"+mapEntry.getValue().getAreaCode()+"_"+mapEntry.getValue().getNumber());
+        String mapToString = "";
+        String adressToString = "";
+        String homeAdressToString, workAdressToString;
+        String companyStreet, companyStreetNumber, companyApartmentNumber, companyFloor, companyZip;
+        String userToString = "";
+        StringJoiner joinerPhone = new StringJoiner(",");
+        StringJoiner joinerUserList = new StringJoiner("|");
+        StringJoiner joinerHomeAddress = new StringJoiner("_");
+        StringJoiner joinerWorkAddress = new StringJoiner("_");
+        for (Map.Entry<String, PhoneNumber> mapEntry: phoneNumbers.entrySet()) {
+            mapToString = (mapEntry.getKey() + "_" + mapEntry.getValue().getCountryCode() + "_" + mapEntry.getValue().getAreaCode() + "_" + mapEntry.getValue().getNumber());
             joinerPhone.add(mapToString);
-            mapToString=joinerPhone.toString();
+            mapToString = joinerPhone.toString();
         }
-        if (company==null||company.getName().equalsIgnoreCase("")){
-
-            adressToString="home_"+(joinerHomeAddress.add(address.streetName).add(Integer.toString(address.streetNumber)).add(Integer.toString(address.apartmentNumber)).add(address.floor).add(address.zipCode).add(address.city).add(address.country)).toString();
-            userToString=(joinerUserList.add(Integer.toString(id)).add(firstName).add(lastName).add(mapToString).add(email).add(Integer.toString(age)).add(adressToString).add("").add("").add(Boolean.toString(isFavorite))).toString();
+        if (company == null || company.getName().equalsIgnoreCase("")) {
+            if (address == null || address.getStreetName() == null) {
+                adressToString = "";
+            } else {
+                adressToString = "home_" + (joinerHomeAddress.add(address.streetName).add(Integer.toString(address.streetNumber)).add(Integer.toString(address.apartmentNumber)).add(address.floor).add(address.zipCode).add(address.city).add(address.country)).toString();
+            }
+            if (email == null) email = "";
+            String ageStr;
+            if (age == null) {
+                ageStr = "";
+            } else ageStr = Integer.toString(age);
+            userToString = (joinerUserList.add(Integer.toString(id)).add(firstName).add(lastName).add(mapToString).add(email).add(ageStr).add(adressToString).add("").add("").add(Boolean.toString(isFavorite))).toString();
 
         } else {
-            adressToString="home_"+(joinerHomeAddress.add(address.streetName).add(Integer.toString(address.streetNumber)).add(Integer.toString(address.apartmentNumber)).add(address.floor).add(address.zipCode).add(address.city).add(address.country)).toString()+",work_"+(joinerWorkAddress.add(company.getAddress().streetName).add(Integer.toString(company.getAddress().streetNumber)).add(Integer.toString(company.getAddress().apartmentNumber)).add(company.getAddress().floor).add(company.getAddress().zipCode).add(company.getAddress().city).add(company.getAddress().country)).toString();
-            userToString=(joinerUserList.add(Integer.toString(id)).add(firstName).add(lastName).add(mapToString).add(email).add(Integer.toString(age)).add(adressToString).add(company.getName()).add(jobTitle).add(Boolean.toString(isFavorite))).toString();
-        }
+            if (address == null || address.getStreetName() == null) {
 
+                if (company.getAddress().getStreetName() == null || company.getAddress().getStreetName().equalsIgnoreCase("")) {
+                    companyStreet = "";
+                    companyStreetNumber = "";
+                    companyApartmentNumber = "";
+                    companyFloor = "";
+                } else {
+                    companyStreet = company.getAddress().streetName;
+                    companyStreetNumber = (company.getAddress().streetNumber).toString();
+                    companyApartmentNumber = (company.getAddress().apartmentNumber).toString();
+                    companyFloor = company.getAddress().floor;
+                }
+                if (company.getAddress().getZipCode() == null || company.getAddress().getZipCode().equalsIgnoreCase("")) {
+                    companyZip = "";
+                } else companyZip = company.getAddress().zipCode;
+                adressToString = "work_" + (joinerWorkAddress.add(companyStreet).add(companyStreetNumber).add(companyApartmentNumber).add(companyFloor).add(companyZip).add(company.getAddress().city).add(company.getAddress().country)).toString();
+            } else {
+                if (company.getAddress().getZipCode() == null) {
+                    companyZip = "";
+                } else companyZip = company.getAddress().zipCode;
+                adressToString = "home_" + (joinerHomeAddress.add(address.streetName).add(Integer.toString(address.streetNumber)).add(Integer.toString(address.apartmentNumber)).add(address.floor).add(address.zipCode).add(address.city).add(address.country)).toString() + ",work_" + (joinerWorkAddress.add(company.getAddress().streetName).add(Integer.toString(company.getAddress().streetNumber)).add(Integer.toString(company.getAddress().apartmentNumber)).add(company.getAddress().floor).add(companyZip).add(company.getAddress().city).add(company.getAddress().country)).toString();
+            }
+            if (email == null) email = "";
+            String ageStr;
+            if (age == null) {
+                ageStr = "";
+            } else ageStr = Integer.toString(age);
+
+            userToString = (joinerUserList.add(Integer.toString(id)).add(firstName).add(lastName).add(mapToString).add(email).add(ageStr).add(adressToString).add(company.getName()).add(jobTitle).add(Boolean.toString(isFavorite))).toString();
+        }
 
 
         return userToString;
@@ -202,14 +241,14 @@ public class User implements Comparable<User> {
         return lastName.compareTo(o.lastName);
     }
 
-    public void printUser () {
+    public void printUser() {
         System.out.println(id + ". " + firstName + " " + lastName);
 
 
     }
 
 
-    public void printUserDetails () {
+    public void printUserDetails() {
         if (getFirstName() == null) {
             if (getLastName() == null) {
                 System.out.println("    ");
@@ -217,8 +256,9 @@ public class User implements Comparable<User> {
             System.out.println(getLastName());
         }
         System.out.println(getFirstName() + " " + getLastName());
-        if (getCompany() != null&&(!getCompany().getName().equalsIgnoreCase(""))) System.out.println(getCompany().getName());
-        if (jobTitle!=null&&(!getJobTitle().equalsIgnoreCase(""))) System.out.println(jobTitle);
+        if (getCompany() != null && (!getCompany().getName().equalsIgnoreCase("")))
+            System.out.println(getCompany().getName());
+        if (jobTitle != null && (!getJobTitle().equalsIgnoreCase(""))) System.out.println(jobTitle);
 
         System.out.println();
         String phone = "";
@@ -228,7 +268,7 @@ public class User implements Comparable<User> {
         }
         if (getEmail() != null) System.out.println(getEmail());
         System.out.println();
-        if (getAddress() != null) {
+        if (getAddress() != null && (getAddress().getStreetName() != null)) {
             System.out.println("home address");
             System.out.println(getAddress().streetName + " nr. " + getAddress().streetNumber + " floor " + getAddress().floor + "  ap. " + getAddress().apartmentNumber);
             System.out.print(getAddress().zipCode);
@@ -237,13 +277,20 @@ public class User implements Comparable<User> {
         }
         System.out.println();
         System.out.println();
-        if (getCompany() != null&&(!getCompany().getName().equalsIgnoreCase(""))) {
+        if (getCompany() != null && (!getCompany().getName().equalsIgnoreCase(""))) {
             System.out.println("work address");
-            System.out.print(getCompany().getAddress().streetName + " nr. " + getCompany().getAddress().streetNumber);
+            if (getCompany().getAddress().streetName == null || getCompany().getAddress().streetName.equalsIgnoreCase("")) {
+                System.out.println();
+            } else if (getCompany().getAddress().streetNumber == null) {
+                System.out.println(getCompany().getAddress().streetName);
+            } else {
+                System.out.print(getCompany().getAddress().streetName + " nr. " + getCompany().getAddress().streetNumber);
+            }
+
             if (getCompany().getAddress().floor != null) System.out.print(" floor " + getCompany().getAddress().floor);
             if (getCompany().getAddress().apartmentNumber != null)
                 System.out.println("  ap. " + getCompany().getAddress().apartmentNumber);
-            System.out.print(getCompany().getAddress().zipCode);
+            if (getCompany().getAddress().zipCode != null) System.out.print(getCompany().getAddress().zipCode);
             System.out.print(" " + getCompany().getAddress().city);
             System.out.print("  " + getCompany().getAddress().country);
 

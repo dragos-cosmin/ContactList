@@ -9,6 +9,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -97,7 +98,7 @@ public class FileUserService implements UserService {
             // overwrite the whole list of contacts in the file
             writeToFile();
 
-        }else System.out.println("User does not exist, try another");
+        } else System.out.println("User does not exist, try another");
     }
 
     @Override
@@ -195,7 +196,14 @@ public class FileUserService implements UserService {
                 }
 
                 String email = fields[4];
-                Integer age = Integer.parseInt(fields[5]);
+                String ageStr= fields[5];
+                Integer age;
+                if (ageStr.equalsIgnoreCase("")){
+                    age=null;
+                }else {
+                    age = Integer.parseInt(ageStr);
+                }
+
                 String adresses = fields[6];
                 Address homeAdress = new Address();
                 Address workAdress = new Address();
@@ -212,11 +220,21 @@ public class FileUserService implements UserService {
                         homeAdress.setCountry(adressFields[7]);
 
                     } else if (adressFields[0].equalsIgnoreCase("work")) {
-                        workAdress.setStreetName(adressFields[1]);
-                        workAdress.setStreetNumber(Integer.parseInt(adressFields[2]));
-                        workAdress.setApartmentNumber(Integer.parseInt(adressFields[3]));
-                        workAdress.setFloor(adressFields[4]);
-                        workAdress.setZipCode(adressFields[5]);
+                        if (adressFields[1].equalsIgnoreCase("")){
+                            workAdress.setStreetName(null);
+                        } else workAdress.setStreetName(adressFields[1]);
+                        if (adressFields[2].equalsIgnoreCase("")){
+                            workAdress.setStreetNumber(null);
+                        }else workAdress.setStreetNumber(Integer.parseInt(adressFields[2]));
+                        if (adressFields[3].equalsIgnoreCase("")){
+                            workAdress.setApartmentNumber(null);
+                        } else workAdress.setApartmentNumber(Integer.parseInt(adressFields[3]));
+                        if (adressFields[4].equalsIgnoreCase("")){
+                            workAdress.setFloor(null);
+                        } else workAdress.setFloor(adressFields[4]);
+                        if (adressFields[5].equalsIgnoreCase("")){
+                            workAdress.setZipCode(null);
+                        } else workAdress.setZipCode(adressFields[5]);
                         workAdress.setCity(adressFields[6]);
                         workAdress.setCountry(adressFields[7]);
 
@@ -267,7 +285,7 @@ public class FileUserService implements UserService {
     public void backupFile() {
 
         if (contactsFile.exists()) {
-            String unicId=UUID.randomUUID().toString();
+            String unicId = UUID.randomUUID().toString();
 
             File backupFile = new File("contactfile_backup" + unicId + ".csv");
 
@@ -293,14 +311,15 @@ public class FileUserService implements UserService {
 
         }
     }
+
     public void restoreFromBackupFile(String backupFileName) {
 
         if (!contactsFile.exists()) {
-                try {
-                    contactsFile.createNewFile();
-                } catch (IOException e){
-                    System.out.println(e.fillInStackTrace());
-                }
+            try {
+                contactsFile.createNewFile();
+            } catch (IOException e) {
+                System.out.println(e.fillInStackTrace());
+            }
 
         }
         List<String> fileLines = new ArrayList<>();
@@ -321,10 +340,10 @@ public class FileUserService implements UserService {
         getContacts();
     }
 
-    public List<File> getFilesFromDir(String fullAbsolutePathName, String containingName){
-        List<File> resultFiles=new ArrayList<>();
+    public List<File> getFilesFromDir(String fullAbsolutePathName, String containingName) {
+        List<File> resultFiles = new ArrayList<>();
         try (Stream<Path> fileStream = Files.walk(Paths.get(fullAbsolutePathName))) {
-             resultFiles = fileStream
+            resultFiles = fileStream
                     .filter(f -> f.getFileName().toString().contains(containingName))
                     .map(Path::toFile)
                     .collect(Collectors.toMap(Function.identity(), File::lastModified))
@@ -339,8 +358,20 @@ public class FileUserService implements UserService {
         }
 
 
+        return resultFiles;
+    }
 
-            return resultFiles;
+    public void printFileNames(String containtingName) {
+        String absolutePathName = contactsFile.getAbsolutePath().substring(0, contactsFile.getAbsolutePath().lastIndexOf("\\"));
+        List<File> resultFiles = getFilesFromDir(absolutePathName, containtingName);
+        int j = 1;
+        for (File f: resultFiles) {
+            System.out.println(j + "." + f.getName() + " last modified " + new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(f.lastModified())));
+            j++;
+
+        }
+        System.out.println();
+
     }
 
 
