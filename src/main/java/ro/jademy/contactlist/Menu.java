@@ -144,10 +144,8 @@ public class Menu {
             case 5:
                 // add new contact
 
-                new User();
-                User newUser;
-                new User();
-                User newUserNoComp;
+                User newUser=new User();
+                User newUserNoComp=new User();
                 System.out.println("Input First Name: ");
                 String firstName = scanner.nextLine();
                 System.out.println("Input Last Name: ");
@@ -165,11 +163,11 @@ public class Menu {
                 String email = scanner.nextLine();
                 Map<String, PhoneNumber> userPhones;
                 userPhones = getPhonesFromKeyboard();
-                System.out.println("Input home adress? Y/N");
+                System.out.println("Input home address? Y/N");
                 String choice = scanner.nextLine();
-                Address homeAdress = new Address();
+                Address homeAddress = new Address();
                 if (choice.equalsIgnoreCase("Y")) {
-                    homeAdress = createAdressFromKeyboard("home");
+                    homeAddress = createAddressFromKeyboard("home");
                 }
                 System.out.println("Input company details? Y/N");
                 choice = scanner.nextLine();
@@ -182,7 +180,7 @@ public class Menu {
                     String jobTitle = scanner.nextLine();
                     Company userCompany = new Company();
                     try {
-                        Address workAdress = createAdressFromKeyboard("work");
+                        Address workAdress = createAddressFromKeyboard("work");
                         userCompany = new Company(company, workAdress);
                     } catch (InputMismatchException e) {
                         System.out.println("Incorect parameters" + e);
@@ -193,7 +191,7 @@ public class Menu {
                     Boolean isFavorite = scanner.nextBoolean();
                     try {
 
-                        newUser = new User(firstName, lastName, email, age, userPhones, homeAdress, jobTitle, userCompany, isFavorite);
+                        newUser = new User(firstName, lastName, email, age, userPhones, homeAddress, jobTitle, userCompany, isFavorite);
 
                         Integer maxId = userService.getContacts().stream().mapToInt(user1 -> user1.getId()).max().getAsInt();
                         maxId++;
@@ -214,7 +212,7 @@ public class Menu {
                     Boolean isFavorite = scanner.nextBoolean();
 
                     try {
-                        newUserNoComp = new User(firstName, lastName, email, age, userPhones, homeAdress, isFavorite);
+                        newUserNoComp = new User(firstName, lastName, email, age, userPhones, homeAddress, isFavorite);
                         Integer maxId = userService.getContacts().stream().mapToInt(user1 -> user1.getId()).max().getAsInt();
                         maxId++;
                         newUserNoComp.setId(maxId);
@@ -553,9 +551,9 @@ public class Menu {
         }
     }
 
-    public static Address createAdressFromKeyboard(String adresstype) {
+    public static Address createAddressFromKeyboard(String addressType) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Input " + adresstype + " adress:");
+        System.out.println("Input " + addressType + " address:");
         System.out.println("Input street name: ");
         String streetName = scanner.nextLine();
         System.out.println("Input house number: ");
@@ -578,7 +576,7 @@ public class Menu {
         String floor = scanner.nextLine();
         System.out.println("Input Zip Code: ");
         String zipCode = scanner.nextLine();
-        System.out.println("Input cityname: ");
+        System.out.println("Input city name: ");
         String city = scanner.nextLine();
         System.out.println("Input country: ");
         String country = scanner.nextLine();

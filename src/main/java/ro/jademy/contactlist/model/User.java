@@ -35,9 +35,9 @@ public class User implements Comparable<User> {
         this(firstName, lastName, email, age, phoneNumbers, address, jobTitle, company, false);
     }
 
-    public User(int id, String firstName,String lastName, String email, Integer age,String jobTitle, boolean isFavorite){
-        this(firstName,lastName,email,age,null,null,jobTitle,null,isFavorite);
-        this.id=id;
+    public User(int id, String firstName, String lastName, String email, Integer age, String jobTitle, boolean isFavorite) {
+        this(firstName, lastName, email, age, null, null, jobTitle, null, isFavorite);
+        this.id = id;
     }
 
     public User(String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, boolean isFavorite) {
@@ -251,6 +251,7 @@ public class User implements Comparable<User> {
 
 
     public void printUserDetails() {
+        System.out.println();
         if (getFirstName() == null) {
             if (getLastName() == null) {
                 System.out.println("    ");
@@ -258,50 +259,64 @@ public class User implements Comparable<User> {
             System.out.println(getLastName());
         }
         System.out.println(getFirstName() + " " + getLastName());
-        if (getCompany().getName() != null && (!getCompany().getName().equalsIgnoreCase(""))){
-            System.out.println(getCompany().getName());
-        }   System.out.println(" ");
 
-        if (jobTitle != null && (!getJobTitle().equalsIgnoreCase(""))){
+        System.out.println("=====================");
+        if (company.getName() != null && (!company.getName().equalsIgnoreCase(""))) {
+            System.out.println(company.getName());
+        } else System.out.println(" ");
+
+        if (jobTitle != null && (!getJobTitle().equalsIgnoreCase(""))) {
             System.out.println(jobTitle);
-        }   System.out.println(" ");
+        } else System.out.println(" ");
 
         System.out.println();
-        String phone = "";
+        System.out.println("=====================");
         for (Map.Entry<String, PhoneNumber> phoneNumberEntry: getPhoneNumbers().entrySet()) {
-            phone = phoneNumberEntry.getKey() + " " + phoneNumberEntry.getValue();
-            System.out.printf("%17s %n", phone);
+            System.out.printf("%6s %14s %n", phoneNumberEntry.getKey(), phoneNumberEntry.getValue());
         }
-        if (getEmail() != null) {
-            System.out.println(getEmail());
-        }   System.out.println(" ");
-        System.out.println();
-        if (getAddress() != null && (getAddress().getStreetName() != null)) {
+        System.out.println(Objects.requireNonNullElse(email, ""));
+        System.out.println("=====================");
+        if (address.streetName == null || (address.streetName.equalsIgnoreCase("null")) || (address.streetName.equalsIgnoreCase(""))) {
+            System.out.println();
+        } else {
             System.out.println("home address");
-            System.out.println(getAddress().streetName + " nr. " + getAddress().streetNumber + " floor " + getAddress().floor + "  ap. " + getAddress().apartmentNumber);
-            System.out.print(getAddress().zipCode);
-            System.out.print(" " + getAddress().city);
-            System.out.print(" " + getAddress().country);
-        }
-        System.out.println();
-        System.out.println();
-        if (getCompany().getName() != null && (!getCompany().getName().equalsIgnoreCase(""))) {
-            System.out.println("work address");
-            if (getCompany().getAddress().streetName == null || getCompany().getAddress().streetName.equalsIgnoreCase("")) {
-                System.out.println();
-            } else if (getCompany().getAddress().streetNumber == null) {
-                System.out.println(getCompany().getAddress().streetName);
+            if (address.streetNumber == null && address.streetNumber != 0) {
+                System.out.println(address.streetName);
             } else {
-                System.out.print(getCompany().getAddress().streetName + " nr. " + getCompany().getAddress().streetNumber);
+                System.out.print(address.streetName + ", nr. " + address.streetNumber + ",\n");
             }
 
-            if (getCompany().getAddress().floor != null) System.out.print(" floor " + getCompany().getAddress().floor);
-            if (getCompany().getAddress().apartmentNumber != null)
-                System.out.println("  ap. " + getCompany().getAddress().apartmentNumber);
-            if (getCompany().getAddress().zipCode != null) System.out.print(getCompany().getAddress().zipCode);
-            System.out.print(" " + getCompany().getAddress().city);
-            System.out.print("  " + getCompany().getAddress().country);
+            System.out.print(Objects.requireNonNullElse("floor " + address.floor, ""));
+            if (address.apartmentNumber != null && address.apartmentNumber != 0) {
+                System.out.println(", ap. " + address.apartmentNumber);
+            } else System.out.println();
 
+            System.out.print(Objects.requireNonNullElse(address.zipCode, ""));
+            System.out.print(" " + address.city);
+            System.out.print(" " + address.country);
+        }
+        System.out.println();
+        System.out.println();
+        if (company.getName() == null || (company.getName().equalsIgnoreCase("")) || company.getName().equalsIgnoreCase("null")) {
+            System.out.println();
+        } else if (company.getAddress().streetName == null || (company.getAddress().streetName.equalsIgnoreCase("null")) || (company.getAddress().streetName.equalsIgnoreCase(""))) {
+            System.out.println();
+        } else {
+            System.out.println("work address");
+            if (company.getAddress().streetNumber == null) {
+            System.out.println(company.getAddress().streetName);
+        } else {
+            System.out.print(company.getAddress().streetName + ", nr. " + company.getAddress().streetNumber + ",\n");
+        }
+        System.out.print(Objects.requireNonNullElse("floor "+ company.getAddress().floor,"") );
+
+        if (company.getAddress().apartmentNumber != null||company.getAddress().apartmentNumber!=0){
+            System.out.println(", ap. " + company.getAddress().apartmentNumber);
+            }else System.out.println();
+            System.out.print(Objects.requireNonNullElse(company.getAddress().zipCode,""));
+            System.out.print(" " + company.getAddress().city);
+            System.out.print(" " + company.getAddress().country+"\n");
+            System.out.println("=====================");
         }
 
 
