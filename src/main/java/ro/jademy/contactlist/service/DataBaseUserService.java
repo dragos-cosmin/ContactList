@@ -1,5 +1,6 @@
 package ro.jademy.contactlist.service;
 
+import com.google.protobuf.MapEntry;
 import ro.jademy.contactlist.model.Address;
 import ro.jademy.contactlist.model.Company;
 import ro.jademy.contactlist.model.PhoneNumber;
@@ -7,6 +8,9 @@ import ro.jademy.contactlist.model.User;
 
 import java.sql.*;
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DataBaseUserService implements UserService {
     private String dataBaseName;
@@ -38,7 +42,6 @@ public class DataBaseUserService implements UserService {
         if (contacts.isEmpty()) {
             contacts.addAll(readFromDB());
         }
-
         return contacts;
     }
 
@@ -54,7 +57,12 @@ public class DataBaseUserService implements UserService {
     }
 
     @Override
-    public void addContact(User user) {
+    public void addContact(User contact) {
+        //add user to Contact list
+        contacts.add(contact);
+
+        //add contact to data base
+        appendToDB(contact);
 
     }
 
@@ -70,14 +78,47 @@ public class DataBaseUserService implements UserService {
 
     @Override
     public List<User> search(String query) {
-        return null;
-    }
 
+        Supplier<Stream<User>> userlistStreamSupplier = () -> contacts.stream();
+
+        List<User> resultFirsName = userlistStreamSupplier.get()
+                .filter(user -> user.getFirstName() != null)
+                .filter(user -> user.getFirstName().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        List<User> resultLastName = userlistStreamSupplier.get()
+                .filter(user -> user.getLastName() != null)
+                .filter(user -> user.getLastName().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        List<User> resultCompany = userlistStreamSupplier.get()
+                .filter(user -> user.getCompany().getName() != null)
+                .filter(user -> user.getCompany().getName().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        List<User> resultJobTitle = userlistStreamSupplier.get()
+                .filter(user -> user.getJobTitle() != null)
+                .filter(user -> user.getJobTitle().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+        List<User> resultPhone = userlistStreamSupplier.get()
+                .filter(user -> user.getPhoneNumbers() != null)
+                .filter(user -> user.getPhoneNumbers().values()
+                        .stream()
+                        .filter(phoneNumber -> phoneNumber.getNumber() != null)
+                        .map(phoneNumber -> phoneNumber.getCountryCode() + phoneNumber.getAreaCode() + phoneNumber.getNumber())
+                        .anyMatch(phoneNumber -> phoneNumber.contains(query)))
+                .collect(Collectors.toList());
+        List<User> resultList = new ArrayList<>();
+        resultList.addAll(resultFirsName);
+        resultList.addAll(resultLastName);
+        resultList.addAll(resultCompany);
+        resultList.addAll(resultJobTitle);
+        resultList.addAll(resultPhone);
+        return resultList;
+
+    }
     private List<User> readFromDB() {
         List<User> contactList = new ArrayList<>();
-        List<Map<String,PhoneNumber>>phonesList=new ArrayList<>();
-        List<Address>homeAdressList=new ArrayList<>();
-        List<Company>companyList=new ArrayList<>();
+        List<Map<String, PhoneNumber>> phonesList = new ArrayList<>();
+        List<Address> homeAdressList = new ArrayList<>();
+        List<Company> companyList = new ArrayList<>();
 
         try {
             Connection conn = getConnection();
@@ -99,15 +140,15 @@ public class DataBaseUserService implements UserService {
 
                     Statement stm2 = conn2.createStatement();
 
-                    ResultSet result2 = stm2.executeQuery("SELECT phone_type, country_code, area_code, phonenumber FROM " + dataBaseName + ".phone_numbers\n"+
-                            "WHERE user_id="+userId+";");
+                    ResultSet result2 = stm2.executeQuery("SELECT phone_type, country_code, area_code, phonenumber FROM " + dataBaseName + ".phone_numbers\n" +
+                            "WHERE user_id=" + userId + ";");
                     Map<String, PhoneNumber> phoneNumbers = new HashMap<>();
                     while (result2.next()) {
                         String phoneType = result2.getString("phone_type");
                         String countryCode = result2.getString("country_code");
                         String areaCode = result2.getString("area_code").substring(1);
                         String phoneNumber = result2.getString("phonenumber");
-                        phoneNumbers.put(phoneType,new PhoneNumber(countryCode,areaCode,phoneNumber));
+                        phoneNumbers.put(phoneType, new PhoneNumber(countryCode, areaCode, phoneNumber));
                     }
                     phonesList.add(phoneNumbers);
                     conn2.close();
@@ -120,10 +161,10 @@ public class DataBaseUserService implements UserService {
                     ResultSet resultSet = statement.executeQuery("SELECT adress_type, street_name, street_no,apart_no,floor,zip_code,city,country, companies.company_name FROM adresses\n" +
                             "LEFT JOIN companies\n" +
                             "ON adresses.user_id=companies.user_id\n" +
-                            "WHERE adresses.user_id="+userId+";");
-                    Address homeAdress=new Address();
-                    Address workAdress=new Address();
-                    Company company=new Company();
+                            "WHERE adresses.user_id=" + userId + ";");
+                    Address homeAdress = new Address();
+                    Address workAdress = new Address();
+                    Company company = new Company();
 
                     while (resultSet.next()) {
                         String adresstype = resultSet.getString("adress_type");
@@ -167,7 +208,7 @@ public class DataBaseUserService implements UserService {
                     e.printStackTrace();
                 }
 
-                User user = new User(firstName,lastName,email,age,phonesList.get(phonesList.size()-1),homeAdressList.get(homeAdressList.size()-1),jobTitle,companyList.get(companyList.size()-1),isFavorite);
+                User user = new User(firstName, lastName, email, age, phonesList.get(phonesList.size() - 1), homeAdressList.get(homeAdressList.size() - 1), jobTitle, companyList.get(companyList.size() - 1), isFavorite);
                 user.setId(userId);
                 contactList.add(user);
             }
@@ -177,6 +218,56 @@ public class DataBaseUserService implements UserService {
         }
 
         return contactList;
+    }
+
+    private void appendToDB(User contact){
+        try {
+            Connection conn=getConnection();
+            Statement stm=conn.createStatement();
+            String query="INSERT INTO users\n"+
+                    "VALUE("+contact.getId()+
+                    ",'"+contact.getFirstName()+
+                    "','"+contact.getLastName()+
+                    "','"+contact.getEmail()+
+                    "',"+contact.getAge()+
+                    ",'"+contact.getJobTitle()+
+                    "',"+contact.isFavorite()+");";
+            stm.executeUpdate(query);
+            for (Map.Entry<String,PhoneNumber>phoneNumberEntry:contact.getPhoneNumbers().entrySet()) {
+                query="INSERT INTO phone_numbers(user_id,phone_type,country_code,area_code,phonenumber)\n" +
+                        "VALUES("+contact.getId()+",'"+phoneNumberEntry.getKey()+"','"+phoneNumberEntry.getValue().getCountryCode()+"','0"+phoneNumberEntry.getValue().getAreaCode()+"','"+phoneNumberEntry.getValue().getNumber()+"');";
+                stm.executeUpdate(query);
+
+            }
+            query="INSERT INTO adresses(user_id,adress_type,street_name,street_no,apart_no,floor,zip_code,city,country)\n"+
+                    "VALUES("+contact.getId()+",'home','"+contact.getAddress().getStreetName()+"',"+contact.getAddress().getStreetNumber()+","+contact.getAddress().getApartmentNumber()+",'"+contact.getAddress().getFloor()+"','"+contact.getAddress().getZipCode()+"','"+contact.getAddress().getCity()+"','"+contact.getAddress().getCountry()+"'),\n"+
+                    "("+contact.getId()+",'work','"+contact.getCompany().getAddress().getStreetName()+
+                    "',"+contact.getCompany().getAddress().getStreetNumber()+
+                    ","+contact.getCompany().getAddress().getApartmentNumber()+
+                    ",'"+contact.getCompany().getAddress().getFloor()+
+                    "','"+contact.getCompany().getAddress().getZipCode()+
+                    "','"+contact.getCompany().getAddress().getCity()+
+                    "','"+contact.getCompany().getAddress().getCountry()+"');";
+            stm.executeUpdate(query);
+            String queryId="SELECT adresses.id FROM adresses\n" +
+                    "WHERE user_id="+contact.getId()+" AND adress_type='work';";
+            ResultSet res2=stm.executeQuery(queryId);
+            int adrId=0;
+            while (res2.next()){
+                adrId=res2.getInt("adresses.id");
+            }
+            query="INSERT INTO companies(user_id,company_name,adress_id)\n" +
+                    "VALUE("+contact.getId()+",'"+contact.getCompany().getName()+"',"+adrId+");";
+            stm.executeUpdate(query);
+
+        }catch (SQLException ex){
+            ex.printStackTrace();
+        }
+
+
+
+
+
     }
 
 

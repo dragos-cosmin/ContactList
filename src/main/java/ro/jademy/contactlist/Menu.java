@@ -537,8 +537,11 @@ public class Menu {
                 break;
 
             case 0:
-
-                ((FileUserService) userService).backupFile(); //creates backup for contactlist.csv
+                try {
+                    ((FileUserService) userService).backupFile(); //creates backup for contactlist.csv
+                }catch (ClassCastException e){
+                    System.out.println("Cannot backup on file!");
+                }
                 System.out.println("Good bye, see You soon!");
                 System.exit(0);
 
