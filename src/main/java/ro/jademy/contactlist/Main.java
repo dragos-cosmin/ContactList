@@ -1,5 +1,6 @@
 package ro.jademy.contactlist;
 
+import ro.jademy.contactlist.service.DataBaseUserService;
 import ro.jademy.contactlist.service.FileUserService;
 import ro.jademy.contactlist.service.UserService;
 
@@ -18,8 +19,9 @@ public class Main {
 
 
         // create a contact list of users
-        UserService userService = new FileUserService("contactlist.csv"); // User service - File user service
+        //UserService userService = new FileUserService("contactlist.csv"); // User service - File user service
         //   UserService userService = new MemoryUserService(); // User service - Memory user service
+        UserService userService=new DataBaseUserService("contactlist","127.0.0.1","3306","root","Px707244@PH925477");
         userService.getContacts();
         Menu menu = new Menu(userService);
 

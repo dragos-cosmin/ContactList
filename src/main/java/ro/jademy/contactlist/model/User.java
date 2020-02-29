@@ -13,13 +13,10 @@ public class User implements Comparable<User> {
     private String lastName;
     private String email;
     private Integer age;
-
     private Map<String, PhoneNumber> phoneNumbers;
     private Address address;
-
     private String jobTitle;
     private Company company;
-
     private boolean isFavorite;
 
     public User(String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, String jobTitle, Company company, boolean isFavorite) {
@@ -36,6 +33,11 @@ public class User implements Comparable<User> {
 
     public User(String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, String jobTitle, Company company) {
         this(firstName, lastName, email, age, phoneNumbers, address, jobTitle, company, false);
+    }
+
+    public User(int id, String firstName,String lastName, String email, Integer age,String jobTitle, boolean isFavorite){
+        this(firstName,lastName,email,age,null,null,jobTitle,null,isFavorite);
+        this.id=id;
     }
 
     public User(String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, boolean isFavorite) {
@@ -256,9 +258,13 @@ public class User implements Comparable<User> {
             System.out.println(getLastName());
         }
         System.out.println(getFirstName() + " " + getLastName());
-        if (getCompany() != null && (!getCompany().getName().equalsIgnoreCase("")))
+        if (getCompany().getName() != null && (!getCompany().getName().equalsIgnoreCase(""))){
             System.out.println(getCompany().getName());
-        if (jobTitle != null && (!getJobTitle().equalsIgnoreCase(""))) System.out.println(jobTitle);
+        }   System.out.println(" ");
+
+        if (jobTitle != null && (!getJobTitle().equalsIgnoreCase(""))){
+            System.out.println(jobTitle);
+        }   System.out.println(" ");
 
         System.out.println();
         String phone = "";
@@ -266,7 +272,9 @@ public class User implements Comparable<User> {
             phone = phoneNumberEntry.getKey() + " " + phoneNumberEntry.getValue();
             System.out.printf("%17s %n", phone);
         }
-        if (getEmail() != null) System.out.println(getEmail());
+        if (getEmail() != null) {
+            System.out.println(getEmail());
+        }   System.out.println(" ");
         System.out.println();
         if (getAddress() != null && (getAddress().getStreetName() != null)) {
             System.out.println("home address");
@@ -277,7 +285,7 @@ public class User implements Comparable<User> {
         }
         System.out.println();
         System.out.println();
-        if (getCompany() != null && (!getCompany().getName().equalsIgnoreCase(""))) {
+        if (getCompany().getName() != null && (!getCompany().getName().equalsIgnoreCase(""))) {
             System.out.println("work address");
             if (getCompany().getAddress().streetName == null || getCompany().getAddress().streetName.equalsIgnoreCase("")) {
                 System.out.println();
