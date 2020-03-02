@@ -116,7 +116,7 @@ public class Menu {
                 Integer requestIndex = scanner.nextInt();
                 scanner.nextLine();
                 tInit = System.nanoTime();
-                Optional<User> optionalUser = userService.getContactbyId(requestIndex);
+                Optional<User> optionalUser = userService.getContactById(requestIndex);
                 if (optionalUser.isPresent()) {
                     User requestUser = optionalUser.get();
                     requestUser.printUserDetails();
@@ -234,7 +234,7 @@ public class Menu {
                 requestIndex = scanner.nextInt();
                 scanner.nextLine();
                 tInit = System.nanoTime();
-                Optional<User> optionalRequestUser = userService.getContactbyId(requestIndex);
+                Optional<User> optionalRequestUser = userService.getContactById(requestIndex);
                 User requestUser = new User();
                 if (optionalRequestUser.isPresent()) {
                     requestUser = optionalRequestUser.get();
@@ -574,8 +574,14 @@ public class Menu {
         }
         System.out.println("Input floor: ");
         String floor = scanner.nextLine();
+        if (floor.isEmpty()){
+            floor=null;
+        }
         System.out.println("Input Zip Code: ");
         String zipCode = scanner.nextLine();
+        if (zipCode.isEmpty()){
+            zipCode=null;
+        }
         System.out.println("Input city name: ");
         String city = scanner.nextLine();
         System.out.println("Input country: ");

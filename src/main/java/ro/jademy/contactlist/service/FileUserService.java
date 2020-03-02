@@ -61,10 +61,9 @@ public class FileUserService implements UserService {
     }
 
     @Override
-    public Optional<User> getContactbyId(int userId) {
-        Optional<User> userOpt = contacts.stream().filter(user -> user.getId() == userId).findFirst();
+    public Optional<User> getContactById(int userId) {
 
-        return userOpt;
+        return contacts.stream().filter(user -> user.getId() == userId).findFirst();
     }
 
     @Override
@@ -80,7 +79,7 @@ public class FileUserService implements UserService {
     @Override
     public void editContact(int userId, String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, String jobTitle, Company company, boolean isFavorite) {
 
-        Optional<User> userOpt = getContactbyId(userId);
+        Optional<User> userOpt = getContactById(userId);
         // edit the contact only if the user was found
         if (userOpt.isPresent()) {
             User user = userOpt.get();
@@ -104,7 +103,7 @@ public class FileUserService implements UserService {
     @Override
     public void removeContact(int userId) {
 
-        Optional<User> userOpt = getContactbyId(userId);
+        Optional<User> userOpt = getContactById(userId);
 
         // remove the contact only if found
         if (userOpt.isPresent()) {

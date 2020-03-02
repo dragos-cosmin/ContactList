@@ -1,6 +1,5 @@
 package ro.jademy.contactlist.service;
 
-import com.google.protobuf.MapEntry;
 import ro.jademy.contactlist.model.Address;
 import ro.jademy.contactlist.model.Company;
 import ro.jademy.contactlist.model.PhoneNumber;
@@ -50,10 +49,9 @@ public class DataBaseUserService implements UserService {
 
 
     @Override
-    public Optional<User> getContactbyId(int userId) {
-        Optional<User> userOpt = contacts.stream().filter(user -> user.getId() == userId).findFirst();
+    public Optional<User> getContactById(int userId) {
 
-        return userOpt;
+        return contacts.stream().filter(user -> user.getId() == userId).findFirst();
     }
 
     @Override
@@ -69,10 +67,42 @@ public class DataBaseUserService implements UserService {
     @Override
     public void editContact(int userId, String firstName, String lastName, String email, Integer age, Map<String, PhoneNumber> phoneNumbers, Address address, String jobTitle, Company company, boolean isFavorite) {
 
+        Optional<User> userOpt = getContactById(userId);
+        // edit the contact only if the user was found
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setEmail(email);
+            user.setAge(age);
+            user.setPhoneNumbers(phoneNumbers);
+            user.setAddress(address);
+            user.setJobTitle(jobTitle);
+            user.setCompany(company);
+            user.setFavorite(isFavorite);
+
+            // update user record in data base
+            updateUserToDB(user);
+        } else System.out.println("User does not exist, try another");
     }
 
     @Override
     public void removeContact(int userId) {
+
+        Optional<User> userOpt = getContactById(userId);
+
+        // remove the contact only if found
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            contacts.remove(user);
+            System.out.println("User removed:");
+            user.printUserDetails();
+            deleteUserFromDB(user);
+        } else {
+            System.out.println("User has been previously removed, try another");
+        }
+
 
     }
 
@@ -135,11 +165,11 @@ public class DataBaseUserService implements UserService {
                 String email = result.getString("email");
                 Integer age = result.getInt("age");
                 String jobTitle = result.getString("job_title");
-                Boolean isFavorite = result.getBoolean("is_favorite");
+                boolean isFavorite = result.getBoolean("is_favorite");
 
-                try {
-                    Connection phoneConnection = getConnection();
-                    Statement phoneStatement = phoneConnection.createStatement();
+
+
+                    Statement phoneStatement = userConnection.createStatement();
                     String phoneQuery = "SELECT phone_type, country_code, area_code, phonenumber FROM " + dataBaseName + ".phone_numbers\n" +
                             "WHERE user_id=" + userId + ";";
                     ResultSet phoneResult = phoneStatement.executeQuery(phoneQuery);
@@ -154,13 +184,11 @@ public class DataBaseUserService implements UserService {
                         phoneNumbers.put(phoneType, new PhoneNumber(countryCode, areaCode, phoneNumber));
                     }
                     phonesList.add(phoneNumbers);
-                    phoneConnection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    Connection addressConnection = getConnection();
-                    Statement addressConnectionStatement = addressConnection.createStatement();
+
+
+
+
+                    Statement addressConnectionStatement = userConnection.createStatement();
                     String addressQuerry = "SELECT adress_type, street_name, street_no,apart_no,floor,zip_code,city,country, companies.company_name FROM adresses\n" +
                             "LEFT JOIN companies\n" +
                             "ON adresses.user_id=companies.user_id\n" +
@@ -208,11 +236,9 @@ public class DataBaseUserService implements UserService {
                     }
                     homeAdressList.add(homeAdress);
                     companyList.add(company);
-                    addressConnection.close();
 
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+
+
 
                 User user = new User(firstName, lastName, email, age, phonesList.get(phonesList.size() - 1), homeAdressList.get(homeAdressList.size() - 1), jobTitle, companyList.get(companyList.size() - 1), isFavorite);
                 user.setId(userId);
@@ -269,6 +295,38 @@ public class DataBaseUserService implements UserService {
             ex.printStackTrace();
         }
 
+
+    }
+
+    private void deleteUserFromDB(User contact){
+        try {
+            Connection connection=getConnection();
+            Statement statement=connection.createStatement();
+            String querry="DELETE FROM companies\n"+
+                    "WHERE user_id="+contact.getId()+";";
+            statement.executeUpdate(querry);
+
+            querry="DELETE FROM adresses\n"+
+                    "WHERE user_id="+contact.getId()+";";
+            statement.executeUpdate(querry);
+
+            querry="DELETE FROM phone_numbers\n"+
+                    "WHERE user_id="+contact.getId()+";";
+            statement.executeUpdate(querry);
+
+            querry="DELETE FROM users\n"+
+                    "WHERE id="+contact.getId()+";";
+            statement.executeUpdate(querry);
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    private void updateUserToDB(User contact) {
+        deleteUserFromDB(contact);
+        appendToDB(contact);
 
     }
 

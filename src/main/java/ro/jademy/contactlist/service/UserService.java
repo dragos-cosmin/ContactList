@@ -13,7 +13,7 @@ public interface UserService {
 
     List<User> getContacts();
 
-    Optional<User> getContactbyId(int userId);
+    Optional<User> getContactById(int userId);
 
     void addContact(User user);
 

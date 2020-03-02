@@ -310,7 +310,7 @@ public class User implements Comparable<User> {
         }
         System.out.print(Objects.requireNonNullElse("floor "+ company.getAddress().floor,"") );
 
-        if (company.getAddress().apartmentNumber != null||company.getAddress().apartmentNumber!=0){
+        if (company.getAddress().apartmentNumber != null&&company.getAddress().apartmentNumber!=0){
             System.out.println(", ap. " + company.getAddress().apartmentNumber);
             }else System.out.println();
             System.out.print(Objects.requireNonNullElse(company.getAddress().zipCode,""));
