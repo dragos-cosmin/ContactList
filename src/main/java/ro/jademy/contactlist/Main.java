@@ -21,7 +21,8 @@ public class Main {
         // create a contact list of users
         //UserService userService = new FileUserService("contactlist.csv"); // User service - File user service
         //   UserService userService = new MemoryUserService(); // User service - Memory user service
-        UserService userService=new DataBaseUserService("contactlist","127.0.0.1","3306","root","Px707244@PH925477");
+  //      UserService userService=new DataBaseUserService("contactlist","127.0.0.1","3306","root","Px707244@PH925477");
+        UserService userService=new DataBaseUserService("dbproperties.prop");
         userService.getContacts();
         Menu menu = new Menu(userService);
 

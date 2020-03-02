@@ -5,6 +5,9 @@ import ro.jademy.contactlist.model.Company;
 import ro.jademy.contactlist.model.PhoneNumber;
 import ro.jademy.contactlist.model.User;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Supplier;
@@ -12,27 +15,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DataBaseUserService implements UserService {
-    private String dataBaseName;
-    private String serverLocation;
-    private String serverPort;
-    private String userName;
-    private String userPass;
+    private String propertiesFileName;
     private List<User> contacts = new ArrayList<>();
 
-    public DataBaseUserService(String dataBaseName, String serverLocation, String serverPort, String userName, String userPass) {
-        this.dataBaseName = dataBaseName;
-        this.serverLocation = serverLocation;
-        this.serverPort = serverPort;
-        this.userName = userName;
-        this.userPass = userPass;
-    }
-
-    public String getDataBaseName() {
-        return dataBaseName;
-    }
-
-    public void setDataBaseName(String dataBaseName) {
-        this.dataBaseName = dataBaseName;
+    public DataBaseUserService(String propertiesFileName) {
+        this.propertiesFileName = propertiesFileName;
     }
 
     public void setContacts(List<User> contacts) {
@@ -146,15 +133,16 @@ public class DataBaseUserService implements UserService {
     }
 
     private List<User> readFromDB() {
+        Properties properties=getProperties(propertiesFileName);
         List<User> contactList = new ArrayList<>();
         List<Map<String, PhoneNumber>> phonesList = new ArrayList<>();
         List<Address> homeAdressList = new ArrayList<>();
         List<Company> companyList = new ArrayList<>();
 
         try {
-            Connection userConnection = getConnection();
+            Connection userConnection = getConnection(properties);
             Statement userStatement = userConnection.createStatement();
-            String userQuery = "SELECT * FROM " + dataBaseName + ".users;";
+            String userQuery = "SELECT * FROM " + properties.getProperty("db.name") + ".users;";
 
             ResultSet result = userStatement.executeQuery(userQuery);
 
@@ -168,7 +156,7 @@ public class DataBaseUserService implements UserService {
                 boolean isFavorite = result.getBoolean("is_favorite");
 
                 Statement phoneStatement = userConnection.createStatement();
-                String phoneQuery = "SELECT phone_type, country_code, area_code, phonenumber FROM " + dataBaseName + ".phone_numbers\n" +
+                String phoneQuery = "SELECT phone_type, country_code, area_code, phonenumber FROM " + properties.getProperty("db.name") + ".phone_numbers\n" +
                         "WHERE user_id=" + userId + ";";
                 ResultSet phoneResult = phoneStatement.executeQuery(phoneQuery);
 
@@ -245,8 +233,9 @@ public class DataBaseUserService implements UserService {
     }
 
     private void appendToDB(User contact) {
+        Properties properties=getProperties(propertiesFileName);
         try {
-            Connection conn = getConnection();
+            Connection conn = getConnection(properties);
             Statement stm = conn.createStatement();
             String query = "INSERT INTO users\n" +
                     "VALUE(" + contact.getId() +
@@ -292,8 +281,9 @@ public class DataBaseUserService implements UserService {
     }
 
     private void deleteUserFromDB(User contact) {
+        Properties properties=getProperties(propertiesFileName);
         try {
-            Connection connection = getConnection();
+            Connection connection = getConnection(properties);
             Statement statement = connection.createStatement();
             String querry = "DELETE FROM companies\n" +
                     "WHERE user_id=" + contact.getId() + ";";
@@ -324,16 +314,30 @@ public class DataBaseUserService implements UserService {
     }
 
 
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection(Properties props) throws SQLException {
 
         Properties connectionProps = new Properties();
-        connectionProps.put("user", userName);                  //connectionProps.put("user","someusername");
-        connectionProps.put("password", userPass);               //connectionProps.put("password","userpassword");
+        connectionProps.put("user",props.getProperty("db.user") );                  //connectionProps.put("user","someusername");
+        connectionProps.put("password", props.getProperty("db.password"));               //connectionProps.put("password","userpassword");
 
         return DriverManager.getConnection(
                 "jdbc:" + "mysql" + "://" +
-                        serverLocation + ":" + serverPort + "/" + dataBaseName + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
+                        props.getProperty("db.connectionString") + ":" + props.getProperty("db.port") + "/" + props.getProperty("db.name") + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
                 connectionProps);
 
     }
+
+    public static Properties getProperties(String propertiesFileName){
+        Properties prop=new Properties();
+        try (InputStream input=DataBaseUserService.class.getResourceAsStream("/"+propertiesFileName ) ){
+            prop.load(input);
+
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+        return prop;
+    }
+
 }
+

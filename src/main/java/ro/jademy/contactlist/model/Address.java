@@ -125,6 +125,7 @@ public class Address {
 
     public Address verifyAdress(Address address){
         Address resultAdress=new Address();
+
         if (address.getStreetName()==null){
             resultAdress.setStreetName("");
         } resultAdress.setStreetName(address.streetName);
