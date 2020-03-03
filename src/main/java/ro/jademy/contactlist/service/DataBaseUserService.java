@@ -132,7 +132,7 @@ public class DataBaseUserService implements UserService {
     }
 
     private List<User> readFromDB() {
-        Properties properties=getProperties(propertiesFileName);
+        Properties properties = getProperties(propertiesFileName);
         List<User> contactList = new ArrayList<>();
         List<Map<String, PhoneNumber>> phonesList = new ArrayList<>();
         List<Address> homeAdressList = new ArrayList<>();
@@ -232,7 +232,7 @@ public class DataBaseUserService implements UserService {
     }
 
     private void appendToDB(User contact) {
-        Properties properties=getProperties(propertiesFileName);
+        Properties properties = getProperties(propertiesFileName);
         try {
             Connection conn = getConnection(properties);
             Statement stm = conn.createStatement();
@@ -280,7 +280,7 @@ public class DataBaseUserService implements UserService {
     }
 
     private void deleteUserFromDB(User contact) {
-        Properties properties=getProperties(propertiesFileName);
+        Properties properties = getProperties(propertiesFileName);
         try {
             Connection connection = getConnection(properties);
             Statement statement = connection.createStatement();
@@ -312,54 +312,50 @@ public class DataBaseUserService implements UserService {
 
     }
 
-
     public Connection getConnection(Properties props) throws SQLException {
 
         Properties connectionProps = new Properties();
-        connectionProps.put("user",props.getProperty("db.user") );                  //connectionProps.put("user","someusername");
+        connectionProps.put("user", props.getProperty("db.user"));                  //connectionProps.put("user","someusername");
         connectionProps.put("password", props.getProperty("db.password"));               //connectionProps.put("password","userpassword");
-        Connection servConn=DriverManager.getConnection("jdbc:" + "mysql" + "://" +
-                        props.getProperty("db.connectionString") + ":" + props.getProperty("db.port") + "/"  + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
+        Connection servConn = DriverManager.getConnection("jdbc:" + "mysql" + "://" +
+                        props.getProperty("db.connectionString") + ":" + props.getProperty("db.port") + "/" + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
                 connectionProps);
-        ResultSet resultSet=servConn.getMetaData().getCatalogs();
-        boolean dataBaseExists=false;
-        while (resultSet.next()){
-            String dataBaseName=resultSet.getString(1);
-            if (dataBaseName.equals(props.getProperty("db.name"))){
-                dataBaseExists=true;
+        ResultSet resultSet = servConn.getMetaData().getCatalogs();
+        boolean dataBaseExists = false;
+        while (resultSet.next()) {
+            String dataBaseName = resultSet.getString(1);
+            if (dataBaseName.equals(props.getProperty("db.name"))) {
+                dataBaseExists = true;
             }
         }
         resultSet.close();
 
-        if (!dataBaseExists){
-            ScriptRunner scriptRunner=new ScriptRunner(servConn);
+        if (!dataBaseExists) {
+            ScriptRunner scriptRunner = new ScriptRunner(servConn);
             try {
-                Reader reader=new BufferedReader(new FileReader("contactListCreate.sql"));
+                Reader reader = new BufferedReader(new FileReader("contactListCreate.sql"));
                 scriptRunner.runScript(reader);
-                Reader reader1=new BufferedReader(new FileReader("contactListPopulate.sql"));
+                Reader reader1 = new BufferedReader(new FileReader("contactListPopulate.sql"));
                 scriptRunner.runScript(reader1);
 
-            }catch (FileNotFoundException f){
+            } catch (FileNotFoundException f) {
                 System.out.println(f.getCause());
             }
 
-
         }
-
 
         return DriverManager.getConnection(
                 "jdbc:" + "mysql" + "://" +
                         props.getProperty("db.connectionString") + ":" + props.getProperty("db.port") + "/" + props.getProperty("db.name") + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
                 connectionProps);
-
     }
 
-    public static Properties getProperties(String propertiesFileName){
-        Properties prop=new Properties();
-        try (InputStream input=DataBaseUserService.class.getResourceAsStream("/"+propertiesFileName ) ){
+    public static Properties getProperties(String propertiesFileName) {
+        Properties prop = new Properties();
+        try (InputStream input = DataBaseUserService.class.getResourceAsStream("/" + propertiesFileName)) {
             prop.load(input);
 
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
 

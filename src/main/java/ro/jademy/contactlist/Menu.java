@@ -449,11 +449,11 @@ public class Menu {
                 final long favoriteCount = userService.getContacts().stream().filter(user -> user.isFavorite()).count();
                 System.out.println("You have " + favoriteCount + " contacts in your favorite list");
 
-                final OptionalInt minAge = userService.getContacts().stream().mapToInt(User::getAge).min();
+                final OptionalInt minAge = userService.getContacts().stream().filter(user -> user.getAge()!=null).mapToInt(User::getAge).min();
                 if (minAge.isPresent()){
                     System.out.println("Minimum age is: " + minAge);
 
-                } else System.out.println("Value unfound");
+                } else System.out.println("Value unfounded");
 
                 tFinal = System.nanoTime();
                 timeElapsed(tInit, tFinal);

@@ -11,21 +11,19 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         int option;
-        UserService userService=new MemoryUserService(); // User service - Memory user service
+        UserService userService = new MemoryUserService(); // User service - Memory user service
         System.out.println("Default MemoryUserService, if you want to change input (f) FileUserService, (d) DataBaseUserService :");
-        String servOpt=scanner.nextLine().toLowerCase();
-        switch (servOpt){
+        String servOpt = scanner.nextLine().toLowerCase();
+        switch (servOpt) {
             case ("f"):
-               userService = new FileUserService("contactlist.csv"); // User service - File user service
-               break;
+                userService = new FileUserService("contactlist.csv"); // User service - File user service
+                break;
             case ("d"):
-                userService=new DataBaseUserService("dbproperties.prop");
+                userService = new DataBaseUserService("dbproperties.prop");
                 break;
             default:
                 System.out.println("input f or d if you want to change. MemoryUserService default");
-
         }
-
 
         userService.getContacts();
         Menu menu = new Menu(userService);
