@@ -450,7 +450,10 @@ public class Menu {
                 System.out.println("You have " + favoriteCount + " contacts in your favorite list");
 
                 final OptionalInt minAge = userService.getContacts().stream().mapToInt(User::getAge).min();
-                System.out.println("Minimum age is: " + minAge);
+                if (minAge.isPresent()){
+                    System.out.println("Minimum age is: " + minAge);
+
+                } else System.out.println("Value unfound");
 
                 tFinal = System.nanoTime();
                 timeElapsed(tInit, tFinal);

@@ -1,13 +1,12 @@
 package ro.jademy.contactlist.service;
 
+import org.apache.ibatis.jdbc.ScriptRunner;
 import ro.jademy.contactlist.model.Address;
 import ro.jademy.contactlist.model.Company;
 import ro.jademy.contactlist.model.PhoneNumber;
 import ro.jademy.contactlist.model.User;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Supplier;
@@ -319,6 +318,34 @@ public class DataBaseUserService implements UserService {
         Properties connectionProps = new Properties();
         connectionProps.put("user",props.getProperty("db.user") );                  //connectionProps.put("user","someusername");
         connectionProps.put("password", props.getProperty("db.password"));               //connectionProps.put("password","userpassword");
+        Connection servConn=DriverManager.getConnection("jdbc:" + "mysql" + "://" +
+                        props.getProperty("db.connectionString") + ":" + props.getProperty("db.port") + "/"  + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
+                connectionProps);
+        ResultSet resultSet=servConn.getMetaData().getCatalogs();
+        boolean dataBaseExists=false;
+        while (resultSet.next()){
+            String dataBaseName=resultSet.getString(1);
+            if (dataBaseName.equals(props.getProperty("db.name"))){
+                dataBaseExists=true;
+            }
+        }
+        resultSet.close();
+
+        if (!dataBaseExists){
+            ScriptRunner scriptRunner=new ScriptRunner(servConn);
+            try {
+                Reader reader=new BufferedReader(new FileReader("contactListCreate.sql"));
+                scriptRunner.runScript(reader);
+                Reader reader1=new BufferedReader(new FileReader("contactListPopulate.sql"));
+                scriptRunner.runScript(reader1);
+
+            }catch (FileNotFoundException f){
+                System.out.println(f.getCause());
+            }
+
+
+        }
+
 
         return DriverManager.getConnection(
                 "jdbc:" + "mysql" + "://" +
