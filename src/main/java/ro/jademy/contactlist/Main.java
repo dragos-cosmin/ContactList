@@ -27,6 +27,7 @@ public class Main {
 
         userService.getContacts();
         Menu menu = new Menu(userService);
+        userService.updateFromDataSource();
 
         do {
             System.out.println();

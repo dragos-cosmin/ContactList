@@ -11,6 +11,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -156,6 +159,10 @@ public class FileUserService implements UserService {
         resultList.addAll(resultPhone);
         return resultList;
 
+    }
+    @Override
+    public void backup(){
+        backupFile();
     }
 
 
@@ -339,11 +346,12 @@ public class FileUserService implements UserService {
         getContacts();
     }
 
-    public List<File> getFilesFromDir(String fullAbsolutePathName, String containingName) {
+    public static List<File> getFilesFromDir(String fullAbsolutePathName, String containingName, String extension) {
         List<File> resultFiles = new ArrayList<>();
         try (Stream<Path> fileStream = Files.walk(Paths.get(fullAbsolutePathName))) {
             resultFiles = fileStream
                     .filter(f -> f.getFileName().toString().contains(containingName))
+                    .filter(f->f.getFileName().toString().contains(extension))
                     .map(Path::toFile)
                     .collect(Collectors.toMap(Function.identity(), File::lastModified))
                     .entrySet()
@@ -362,7 +370,7 @@ public class FileUserService implements UserService {
 
     public void printFileNames(String containtingName) {
         String absolutePathName = contactsFile.getAbsolutePath().substring(0, contactsFile.getAbsolutePath().lastIndexOf("\\"));
-        List<File> resultFiles = getFilesFromDir(absolutePathName, containtingName);
+        List<File> resultFiles = getFilesFromDir(absolutePathName, containtingName,".csv");
         int j = 1;
         for (File f: resultFiles) {
             System.out.println(j + "." + f.getName() + " last modified " + new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(f.lastModified())));
@@ -372,6 +380,136 @@ public class FileUserService implements UserService {
         System.out.println();
 
     }
+        public static long lastModified=0;
+
+    @Override
+    public void updateFromDataSource(){
+
+        ScheduledExecutorService executorService= Executors.newSingleThreadScheduledExecutor();
+            lastModified=contactsFile.lastModified();
+
+            executorService.scheduleWithFixedDelay(()->{  // pt thread at fixed delay
+
+                if (!((contactsFile.lastModified() ==lastModified))){
+                    contacts.clear();
+                    getContacts();
+                    lastModified=(contactsFile.lastModified());
+                }
+
+                //System.out.println("Nothing changed");
+
+
+
+
+            },1,10, TimeUnit.SECONDS);
+
+        }
+
+    public void showBackupMenu() {
+        System.out.println("      BACKUP MENU     ");
+        System.out.println("======================");
+        System.out.println("1. View backup files  ");
+        System.out.println("2. Restore from file  ");
+        System.out.println("3. Purge old backups  ");
+        System.out.println("4. Create backup now  ");
+        System.out.println("0. EXIT               ");
+        System.out.println("======================");
+
+    }
+
+    @Override
+    public void backupDataMenu(){
+        Scanner scanner=new Scanner(System.in);
+        int backupOption;
+        Map<Integer, String> fileMap = new HashMap<>();
+        do {
+            showBackupMenu();
+            fileMap.clear();
+            System.out.println();
+            System.out.println("Input option: ");
+            backupOption = scanner.nextInt();
+            scanner.nextLine();
+            String FullAbsolutePathName = (contactsFile.getAbsolutePath());
+            String absolutePathName = FullAbsolutePathName.substring(0, FullAbsolutePathName.lastIndexOf("\\"));
+            int j = 1;
+            List<File> fileNames = getFilesFromDir(absolutePathName, "backup",".csv");
+
+            for (File f: fileNames) {
+                fileMap.put(j, f.getName());
+                j++;
+            }
+
+            switch (backupOption) {
+                case 1:
+                    //list backup files, file names and last modified date, sorted oldest first
+                    int x = 1;
+                    fileNames = getFilesFromDir(absolutePathName, "backup",".csv");
+
+                    for (File f: fileNames) {
+                        System.out.println(x + "." + f.getName() + " last modified " + new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(f.lastModified())));
+                        x++;
+
+                    }
+                    System.out.println();
+
+                    break;
+                case 2:
+                    //restore backups from file
+
+                    System.out.println("restore backups from file");
+                    printFileNames("backup");
+                    System.out.println("Input index: ");
+                    Integer backupIndex = scanner.nextInt();
+                    scanner.nextLine();
+
+                    Optional<Map.Entry<Integer, String>> result = fileMap.entrySet().stream()
+                            .filter(integerStringEntry -> integerStringEntry.getKey().equals(backupIndex))
+                            .findFirst();
+                    Map.Entry<Integer, String> entryResult = null;
+                    if (result.isPresent()) {
+                        entryResult = result.get();
+                    } else {
+                        System.out.println("Nothing found");
+                    }
+                    String backupFileName = entryResult.getValue();
+                    System.out.println("file name is: " + backupFileName);
+                    restoreFromBackupFile(backupFileName);
+
+
+                    break;
+                case 3:
+                    //purge old backups
+                    System.out.println("How many of the last backup files do you want to keep?");
+                    int keptFiles = scanner.nextInt();
+                    scanner.nextLine();
+                    List<File> backupFiles = getFilesFromDir(absolutePathName, "backup",".csv");
+                    for (int i = backupFiles.size() - keptFiles - 1; i >= 0; i--) {
+                        backupFiles.get(i).delete();
+                    }
+                    break;
+                case 4:
+                    //create backup now
+                    System.out.println("Do you want to create a backup now? Y/N");
+                    if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                        backupFile();
+                    }
+
+
+                case 0:
+                    break;
+                default:
+                    System.out.println("Input only available options 1,2,3,4,0");
+                    break;
+            }
+
+        } while (backupOption != 0);
+
+
+
+    }
+
+
+
 
 
 }

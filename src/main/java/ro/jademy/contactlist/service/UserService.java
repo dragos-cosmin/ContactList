@@ -29,5 +29,11 @@ public interface UserService {
 
     List<User> search(String query);
 
+    void updateFromDataSource();
+
+    void backupDataMenu();
+
+    void backup();
+
 
 }

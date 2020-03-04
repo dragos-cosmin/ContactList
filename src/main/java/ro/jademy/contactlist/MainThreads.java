@@ -3,7 +3,6 @@ package ro.jademy.contactlist;
 import ro.jademy.contactlist.service.FileUserService;
 import ro.jademy.contactlist.service.UserService;
 
-import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

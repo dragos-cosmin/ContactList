@@ -8,7 +8,12 @@ import ro.jademy.contactlist.model.User;
 
 import java.io.*;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -128,6 +133,124 @@ public class DataBaseUserService implements UserService {
         resultList.addAll(resultJobTitle);
         resultList.addAll(resultPhone);
         return resultList;
+
+    }
+    @Override
+    public void backup(){
+        backupDB();
+    }
+
+
+    @Override
+    public void updateFromDataSource(){
+        ScheduledExecutorService executorService= Executors.newSingleThreadScheduledExecutor();
+        executorService.scheduleWithFixedDelay(()->{  // pt thread at fixed delay
+
+                contacts.clear();
+                getContacts();
+
+        },1,10, TimeUnit.SECONDS);
+    }
+
+    public void showBackupMenu() {
+        System.out.println("        BACKUP MENU         ");
+        System.out.println("============================");
+        System.out.println("1. View backup dump files   ");
+        System.out.println("2. Restore from dump file   ");
+        System.out.println("3. Purge old backups        ");
+        System.out.println("4. Create backup now        ");
+        System.out.println("0. EXIT                     ");
+        System.out.println("============================");
+
+    }
+
+    @Override
+    public void backupDataMenu(){
+        Scanner scanner=new Scanner(System.in);
+        Object userService=new Object();
+        int backupOption;
+        Map<Integer, String> fileMap = new HashMap<>();
+        do {
+            showBackupMenu();
+            System.out.println();
+            System.out.println("Input option: ");
+            backupOption = scanner.nextInt();
+            scanner.nextLine();
+            String FullAbsolutePathName = (new File(propertiesFileName).getAbsolutePath());
+            String absolutePathName = FullAbsolutePathName.substring(0, FullAbsolutePathName.lastIndexOf("\\"));
+
+            switch (backupOption) {
+                case 1:
+                    //list backup files, file names and last modified date, sorted oldest first
+                    int j = 1;
+
+                    List<File> fileNames = FileUserService.getFilesFromDir(absolutePathName, "backup",".sql");
+
+                    for (File f: fileNames) {
+                        System.out.println(j + "." + f.getName() + " last modified " + new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(f.lastModified())));
+                        fileMap.put(j, f.getName());
+                        j++;
+
+                    }
+                    System.out.println();
+
+                    break;
+                case 2:
+                    //restore backups from file
+                    System.out.println("restore backups from file");
+                    List<File> resultFiles=FileUserService.getFilesFromDir(absolutePathName,"backup",".sql");
+                    int o = 1;
+                    for (File f: resultFiles) {
+                        System.out.println(o + "." + f.getName() + " last modified " + new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date(f.lastModified())));
+                        o++;
+
+                    }
+                    System.out.println("Input index: ");
+                    Integer backupIndex = scanner.nextInt();
+                    scanner.nextLine();
+
+                    Optional<Map.Entry<Integer, String>> result = fileMap.entrySet().stream()
+                            .filter(integerStringEntry -> integerStringEntry.getKey().equals(backupIndex))
+                            .findFirst();
+                    Map.Entry<Integer, String> entryResult = null;
+                    if (result.isPresent()) {
+                        entryResult = result.get();
+                    } else {
+                        System.out.println("Nothing found");
+                    }
+                    String backupFileName = entryResult.getValue();
+                    System.out.println("file name is: " + backupFileName);
+                    restoreDBfromBackupFile(backupFileName);   // restore from backup SQL file
+
+
+                    break;
+                case 3:
+                    //purge old backups
+                    System.out.println("How many of the last backup files do you want to keep?");
+                    int keptFiles = scanner.nextInt();
+                    scanner.nextLine();
+                    List<File> backupFiles = FileUserService.getFilesFromDir(absolutePathName, "backup",".sql");
+                    for (int i = backupFiles.size() - keptFiles - 1; i >= 0; i--) {
+                        backupFiles.get(i).delete();
+                    }
+                    break;
+                case 4:
+                    //create backup now
+                    System.out.println("Do you want to create a backup now? Y/N");
+                    if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                        backupDB();    // create a database backup
+                    }
+
+
+                case 0:
+                    break;
+                default:
+                    System.out.println("Input only available options 1,2,3,4,0");
+                    break;
+            }
+
+        } while (backupOption != 0);
+
 
     }
 
@@ -312,55 +435,130 @@ public class DataBaseUserService implements UserService {
 
     }
 
-    public Connection getConnection(Properties props) throws SQLException {
+    public Connection getConnection(Properties props) {
 
         Properties connectionProps = new Properties();
         connectionProps.put("user", props.getProperty("db.user"));                  //connectionProps.put("user","someusername");
         connectionProps.put("password", props.getProperty("db.password"));               //connectionProps.put("password","userpassword");
-        Connection servConn = DriverManager.getConnection("jdbc:" + "mysql" + "://" +
-                        props.getProperty("db.connectionString") + ":" + props.getProperty("db.port") + "/" + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
-                connectionProps);
-        ResultSet resultSet = servConn.getMetaData().getCatalogs();
-        boolean dataBaseExists = false;
-        while (resultSet.next()) {
-            String dataBaseName = resultSet.getString(1);
-            if (dataBaseName.equals(props.getProperty("db.name"))) {
-                dataBaseExists = true;
-            }
-        }
-        resultSet.close();
+        try {
 
-        if (!dataBaseExists) {
-            ScriptRunner scriptRunner = new ScriptRunner(servConn);
-            try {
-                Reader reader = new BufferedReader(new FileReader("contactListCreate.sql"));
-                scriptRunner.runScript(reader);
-                Reader reader1 = new BufferedReader(new FileReader("contactListPopulate.sql"));
-                scriptRunner.runScript(reader1);
 
-            } catch (FileNotFoundException f) {
-                System.out.println(f.getCause());
+            if (!checkDBexists(props)) {
+                createDBfromSQL(props, "contactListCreate.sql", "contactListContactsPopulate.sql");
             }
 
-        }
-
-        return DriverManager.getConnection(
-                "jdbc:" + "mysql" + "://" +
-                        props.getProperty("db.connectionString") + ":" + props.getProperty("db.port") + "/" + props.getProperty("db.name") + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
-                connectionProps);
-    }
-
-    public static Properties getProperties(String propertiesFileName) {
-        Properties prop = new Properties();
-        try (InputStream input = DataBaseUserService.class.getResourceAsStream("/" + propertiesFileName)) {
-            prop.load(input);
-
-        } catch (IOException e) {
+            return DriverManager.getConnection(
+                    "jdbc:" + "mysql" + "://" +
+                            props.getProperty("db.connectionString") + ":" + props.getProperty("db.port") + "/" + props.getProperty("db.name") + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
+                    connectionProps);
+        }catch (SQLException e){
             e.printStackTrace();
         }
+        return null;
+        }
 
-        return prop;
+        public static Properties getProperties (String propertiesFileName){
+            Properties prop = new Properties();
+            try (InputStream input = DataBaseUserService.class.getResourceAsStream("/" + propertiesFileName)) {
+                prop.load(input);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return prop;
+        }
+
+        public boolean checkDBexists (Properties props){
+            Properties connectionProps = new Properties();
+            boolean DBexists = false;
+            connectionProps.put("user", props.getProperty("db.user"));                  //connectionProps.put("user","someusername");
+            connectionProps.put("password", props.getProperty("db.password"));               //connectionProps.put("password","userpassword");
+            try {
+
+                Connection servConn = DriverManager.getConnection("jdbc:" + "mysql" + "://" +
+                                props.getProperty("db.connectionString") + ":" + props.getProperty("db.port") + "/" + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
+                        connectionProps);
+                ResultSet resultSet = servConn.getMetaData().getCatalogs();
+                while (resultSet.next()) {
+                    String dataBaseName = resultSet.getString(1);
+                    if (dataBaseName.equals(props.getProperty("db.name"))) {
+                        DBexists = true;
+                    }
+
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        return DBexists;
+        }
+
+        public void createDBfromSQL (Properties props,String SqlCreateDBFileName, String SqlPopulateDBFileName){
+            Properties connectionProps = new Properties();
+            connectionProps.put("user", props.getProperty("db.user"));                  //connectionProps.put("user","someusername");
+            connectionProps.put("password", props.getProperty("db.password"));               //connectionProps.put("password","userpassword");
+            try {
+
+                Connection servConn = DriverManager.getConnection("jdbc:" + "mysql" + "://" +
+                                props.getProperty("db.connectionString") + ":" + props.getProperty("db.port") + "/" + "?useTimeZone=true&serverTimezone=EET",  //"server_location"+":"+"server_port"+"/database_name"+"?useTimeZone=true&serverTimezone=EET",
+                        connectionProps);
+                ScriptRunner scriptRunner = new ScriptRunner(servConn);
+                try {
+                    Reader reader = new BufferedReader(new FileReader(SqlCreateDBFileName));
+                    scriptRunner.runScript(reader);
+                    Reader reader1 = new BufferedReader(new FileReader(SqlPopulateDBFileName));
+                    scriptRunner.runScript(reader1);
+
+                } catch (FileNotFoundException f) {
+                    System.out.println(f.getCause());
+                }
+
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+        public void backupDB(){
+        Properties props=getProperties(propertiesFileName);
+        String executeCmd="";
+            String unicId = UUID.randomUUID().toString();
+            executeCmd="mysqldump -u "+props.getProperty("db.user")+" -p"+props.getProperty("db.password")+" "+props.getProperty("db.name")+" -r backup"+unicId+".sql";
+            try {
+                Process runtimeProcess =Runtime.getRuntime().exec(executeCmd);
+                int processComplete = runtimeProcess.waitFor();
+                if(processComplete == 0){
+                    System.out.println("Backup taken successfully");
+                } else {
+                    System.out.println("Could not take mysql backup");
+                }
+
+            }catch (IOException | InterruptedException e){
+                e.printStackTrace();
+            }
+
+        }
+            public void restoreDBfromBackupFile(String backupFileName){
+                Properties props=getProperties(propertiesFileName);
+
+
+                try {
+                    Process runtimeProcess=Runtime.getRuntime().exec(new String[] {"cmd.exe","/c","mysql -u " +props.getProperty("db.user")+" -p"+props.getProperty("db.password")+" " +props.getProperty("db.name")+ " < "+backupFileName});
+                    int processComplete =runtimeProcess.waitFor();
+                //    System.out.println("exit value: "+runtimeProcess.exitValue());
+                    if(processComplete == 0){
+                        System.out.println("Restored successfully");
+                    } else {
+                        System.out.println("Could not restore from mysql backup");
+                    }
+
+                }catch (IOException | InterruptedException e){
+                    e.printStackTrace();
+                }
+
+
+
+
+            }
+
     }
-
-}
-

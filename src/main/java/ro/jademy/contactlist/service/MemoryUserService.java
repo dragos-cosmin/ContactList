@@ -109,6 +109,21 @@ public class MemoryUserService implements UserService {
 
     }
 
+    @Override
+    public void updateFromDataSource(){
+
+    }
+
+    @Override
+    public void backupDataMenu(){
+
+    }
+
+    @Override
+    public void backup(){
+
+    }
+
 
     private List<User> initContacts() {
         // user 1
